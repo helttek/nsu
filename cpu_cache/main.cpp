@@ -5,8 +5,8 @@
 #include <random>
 #include <algorithm>
 #include <fstream>
-#include "../plots/pbPlots.hpp"
-#include "../plots/supportLib.hpp"
+//#include "../plots/pbPlots.hpp"
+//#include "../plots/supportLib.hpp"
 
 void DirectTraversal(size_t *arr, size_t sz) {
     for (size_t i = 0; i < sz - 1; ++i) {
@@ -50,12 +50,12 @@ void RandomTraversal(size_t *arr, size_t sz) {
 
 int main() {
     srand(time(nullptr));
-    const size_t MIN_SIZE = 128, MAX_SIZE = 1835008;//should be: l1 - 3072, l2 - 196608, l3 - 1572864 (for 8-byte elements)
+    const size_t MIN_SIZE = 128, MAX_SIZE = 2000000;//should be: l1 - 4096, l2 - 32768, l3 - 1572864 (for 8-byte elements)
     auto *arr = new size_t[MAX_SIZE];
     std::vector<double> x, y1, y2, y3;//coordinates of the plot
     const size_t repeat = 5;//how many times to traverse the array
 
-    for (size_t i = MIN_SIZE; i < MAX_SIZE; i = (size_t) (i * 1.02)) {
+    for (size_t i = MIN_SIZE; i < MAX_SIZE; i = (size_t) (i * 1.03)) {
         size_t min = ULLONG_MAX;
         std::cout << "array size: " << i << std::endl;
 
