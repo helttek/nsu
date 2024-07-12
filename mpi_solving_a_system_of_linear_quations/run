@@ -1,0 +1,5 @@
+#!/bin/bash
+#arg1 - number of processes
+#arg2 - which version (scattered.cpp or duplicated.cpp)
+rm $2
+make -s $2 && /usr/bin/mpiexec -np $1 ~/nsu/opp/lab1/$2
