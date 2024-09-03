@@ -1,0 +1,3 @@
+/home/helttek/nsu/oop/sound_processor/cmake-build-debug/CMakeFiles/sound_processor.dir
+/home/helttek/nsu/oop/sound_processor/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/helttek/nsu/oop/sound_processor/cmake-build-debug/CMakeFiles/rebuild_cache.dir

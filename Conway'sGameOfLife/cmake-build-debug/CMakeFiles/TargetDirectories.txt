@@ -1,0 +1,3 @@
+/home/anton/nsu/oop/Conway'sGameOfLife/cmake-build-debug/CMakeFiles/Conway_sGameOfLife.dir
+/home/anton/nsu/oop/Conway'sGameOfLife/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/anton/nsu/oop/Conway'sGameOfLife/cmake-build-debug/CMakeFiles/rebuild_cache.dir
