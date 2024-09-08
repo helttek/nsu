@@ -28,13 +28,12 @@ void GetFileInput(std::string filename, double &a, double &b, double &c,
 int main() {
   double a, b, c, d, epsilon;
   GetFileInput("input", a, b, c, d, epsilon);
+  // GetInput(a, b, c, d, epsilon);
   CubicEquationSolver cubicEquationSolver(a, b, c, d, epsilon);
   std::vector<double> res, quadRes;
   cubicEquationSolver.Solve(res);
-  // QuadraticEquation quadEq(1, 4, -5);
-  // quadEq.Solve(quadRes);
-  // for (int i = 0; i < quadRes.size(); ++i) {
-  //   std::cout << "root " << i + 1 << ": " << quadRes[i] << '\n';
-  // }
+  for (size_t i = 0; i < res.size(); ++i) {
+    std::cout << "x" << i + 1 << ": " << res[i] << '\n';
+  }
   return 0;
 }

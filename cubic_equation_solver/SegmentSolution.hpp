@@ -1,7 +1,7 @@
 class SegmentSolution {
 private:
   double f(const double x);
-  double a, b, c, d, epsilon;
+  double a, b, c, d, epsilon, delta = 1;
 
 public:
   SegmentSolution(const double a, const double b, const double c,
