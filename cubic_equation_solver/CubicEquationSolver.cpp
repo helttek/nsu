@@ -71,7 +71,7 @@ void CubicEquationSolver::SecondOption(std::vector<double> solutions,
     }
     if (std::abs(f(lower)) < epsilon && std::abs(f(higher)) > epsilon) {
       res.resize(3); // 2.3
-      res[0] = segSol.InfToA(lower);
+      res[0] = segSol.InfToA(higher);
       res[1] = lower;
       res[2] = lower;
       std::cout << "option: 2.3\n";
@@ -172,7 +172,7 @@ void CubicEquationSolver::Solve(std::vector<double> &res) {
   // std::cerr << "discriminant: " << d << '\n';
   quadEq.Solve(quadSolutions);
   // for (int i = 0; i < quadSolutions.size(); ++i) {
-  //   std::cout << "root " << i + 1 << ": " << quadSolutions[i] << '\n';
+  // std::cout << "root " << i + 1 << ": " << quadSolutions[i] << '\n';
   // }
   if (d < 0) {
     FirstOption(res);

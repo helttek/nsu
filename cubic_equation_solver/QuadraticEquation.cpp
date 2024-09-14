@@ -16,6 +16,9 @@ void QuadraticEquation::Solve(std::vector<double> &res) {
   if (d == 0) {
     res.resize(1);
     res[0] = (-b) / (2 * a);
+    if (res[0] == -0) {
+      res[0] = 0;
+    }
     return;
   }
   res.resize(2);

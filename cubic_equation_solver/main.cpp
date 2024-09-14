@@ -1,5 +1,6 @@
 #include "CubicEquationSolver.hpp"
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 
@@ -25,6 +26,15 @@ void GetFileInput(std::string filename, double &a, double &b, double &c,
   fin >> epsilon >> a >> b >> c >> d;
 }
 
+/*
+ * 1 -2 -1 2 (-1 1 2)
+ * 2 -2 -1 2 (-0.8755)
+ * 1 1 1 -3 (1)
+ * 6 0 0 1 (-0.55)
+ * 5 3 -1.8 0.2 (-1 0.2)
+ * 1 0 0 0 (0 0 0)
+ */
+
 int main() {
   double a, b, c, d, epsilon;
   GetFileInput("input", a, b, c, d, epsilon);
@@ -33,7 +43,8 @@ int main() {
   std::vector<double> res, quadRes;
   cubicEquationSolver.Solve(res);
   for (size_t i = 0; i < res.size(); ++i) {
-    std::cout << "x" << i + 1 << ": " << res[i] << '\n';
+    std::cout << std::setprecision(15) << "x" << i + 1 << ": " << res[i]
+              << '\n';
   }
   return 0;
 }
