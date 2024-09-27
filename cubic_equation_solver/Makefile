@@ -2,7 +2,7 @@
 COMPILER=g++
 FLAGS=-std=c++20 -Wall -Wextra -O2
 SOURCES=main.cpp CubicEquationSolver.cpp QuadraticEquation.cpp SegmentSolution.cpp
-EXECUTABLE=calc_cubic_equation
+EXECUTABLE=cubic_equation
 
 all: clean $(EXECUTABLE)
 
