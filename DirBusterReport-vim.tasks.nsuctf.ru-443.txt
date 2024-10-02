@@ -1,0 +1,20 @@
+DirBuster 1.0-RC1 - Report
+http://www.owasp.org/index.php/Category:OWASP_DirBuster_Project
+Report produced on Tue Oct 01 18:50:53 NOVT 2024
+--------------------------------
+
+https://vim.tasks.nsuctf.ru:443
+--------------------------------
+Directories found during testing:
+
+Dirs found with a 200 response:
+
+/
+/js/
+/jS/
+/Js/
+/JS/
+
+
+--------------------------------
+--------------------------------

