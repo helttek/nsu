@@ -1,5 +1,5 @@
-from selfCopyDetector import SelfCopyDetector
+from self_copy_detector import self_copy_detector
 import sys
 
-scd = SelfCopyDetector(sys.argv)
+scd = self_copy_detector(sys.argv)
 scd.start()
