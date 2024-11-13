@@ -18,3 +18,5 @@ void NewtonPolynomial::CalcAndDump(std::string outFile) {
     }
   }
 }
+
+double NewtonPolynomial::DivDif() { return 1; }

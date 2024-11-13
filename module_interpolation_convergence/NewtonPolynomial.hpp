@@ -1,14 +1,15 @@
-#include <vector>
 #include <string>
+#include <vector>
 
-class NewtonPolynomial
-{
+class NewtonPolynomial {
 private:
-    std::vector<double> coef;
-    std::vector<double> nodes;
+  std::vector<double> coef;
+  std::vector<double> nodes;
 
 public:
-    NewtonPolynomial(const std::vector<double> nodes);
-    ~NewtonPolynomial();
-    void CalcAndDump(std::string outFile);
+  NewtonPolynomial(const std::vector<double> nodes);
+  ~NewtonPolynomial();
+  void CalcAndDump(std::string outFile);
+  // Divided difference
+  double DivDif();
 };
