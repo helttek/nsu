@@ -1,0 +1,26 @@
+w00400000-00401000 r--p 00000000 00:21 74323                              /home/helttek/nsu/operating_systems/threads/thread-example
+00401000-00402000 r-xp 00001000 00:21 74323                              /home/helttek/nsu/operating_systems/threads/thread-example
+00402000-00403000 r--p 00002000 00:21 74323                              /home/helttek/nsu/operating_systems/threads/thread-example
+00403000-00404000 r--p 00002000 00:21 74323                              /home/helttek/nsu/operating_systems/threads/thread-example
+00404000-00405000 rw-p 00003000 00:21 74323                              /home/helttek/nsu/operating_systems/threads/thread-example
+1debe000-1dedf000 rw-p 00000000 00:00 0                                  [heap]
+7f12b4c00000-7f12b4c01000 ---p 00000000 00:00 0 
+7f12b4c01000-7f12b5401000 rw-p 00000000 00:00 0 
+7f12b5600000-7f12b5601000 ---p 00000000 00:00 0 
+7f12b5601000-7f12b5e01000 rw-p 00000000 00:00 0 
+7f12b5e3a000-7f12b5e3d000 rw-p 00000000 00:00 0 
+7f12b5e3d000-7f12b5e65000 r--p 00000000 00:21 174195                     /usr/lib64/libc.so.6
+7f12b5e65000-7f12b5fd2000 r-xp 00028000 00:21 174195                     /usr/lib64/libc.so.6
+7f12b5fd2000-7f12b6020000 r--p 00195000 00:21 174195                     /usr/lib64/libc.so.6
+7f12b6020000-7f12b6024000 r--p 001e2000 00:21 174195                     /usr/lib64/libc.so.6
+7f12b6024000-7f12b6026000 rw-p 001e6000 00:21 174195                     /usr/lib64/libc.so.6
+7f12b6026000-7f12b6030000 rw-p 00000000 00:00 0 
+7f12b6043000-7f12b6047000 r--p 00000000 00:00 0                          [vvar]
+7f12b6047000-7f12b6049000 r-xp 00000000 00:00 0                          [vdso]
+7f12b6049000-7f12b604a000 r--p 00000000 00:21 174192                     /usr/lib64/ld-linux-x86-64.so.2
+7f12b604a000-7f12b6072000 r-xp 00001000 00:21 174192                     /usr/lib64/ld-linux-x86-64.so.2
+7f12b6072000-7f12b607c000 r--p 00029000 00:21 174192                     /usr/lib64/ld-linux-x86-64.so.2
+7f12b607c000-7f12b607e000 r--p 00033000 00:21 174192                     /usr/lib64/ld-linux-x86-64.so.2
+7f12b607e000-7f12b6080000 rw-p 00035000 00:21 174192                     /usr/lib64/ld-linux-x86-64.so.2
+7ffc8acd4000-7ffc8acf5000 rw-p 00000000 00:00 0                          [stack]
+ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
