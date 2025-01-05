@@ -1,0 +1,51 @@
+import lingo/pegcode/driver;
+
+ar_grammar = <<
+S = sum | mul | int ;
+sum = "(" ws S:l ws "+" ws S:r ws ")" { ArSum(:l, :r)};
+mul = "(" ws S:l ws "*" ws S:r ws ")" { ArMult(:l, :r)};
+int = digit+$d { ArInt(s2i($d)) };
+digit = '0'-'9';
+ws = (' ' | '\t' | '\n' | '\r')*;
+>>
+
+ArExpr ::= ArSum, ArMult, ArInt;
+		ArSum(lhs : ArExpr, rhs : ArExpr);
+		ArMult(lhs : ArExpr, rhs : ArExpr);
+		ArInt(val : int);
+
+ar2s(e : ArExpr) -> string {
+	switch (e) {
+		ArSum(lhs, rhs): "(" + ar2s(lhs) + " + " + ar2s(rhs) + ")";
+		ArMult(lhs, rhs): "(" + ar2s(lhs) + " * " + ar2s(rhs) + ")";
+		ArInt(val): i2s(val);
+	}
+}
+
+ar2i(e : ArExpr) -> int {
+	switch (e) {
+		ArSum(lhs, rhs): ar2i(lhs) + ar2i(rhs);
+		ArMult(lhs, rhs): ar2i(lhs) * ar2i(rhs);
+		ArInt(val): val;
+	}
+}
+
+parseString(str : string) -> ArExpr {
+	compiled_grammar = compilePegGrammar(ar_grammar);
+	semantic_actions = SemanticActions(setTree(defaultPegActions.t, "createArInt", \s -> ArInt(s2i(s[0]))));
+	parsic(
+		compiled_grammar,
+		str,
+		semantic_actions
+	);
+}
+
+main() {
+	ar_expr_str = "((3          + 20) * 5)";
+	println("initial string: " + ar_expr_str);
+	parsed_ar_expr = parseString(ar_expr_str);
+	println("built back from tree: " + ar2s(parsed_ar_expr));
+	println(ar_expr_str + " = " + i2s(ar2i(parsed_ar_expr)));
+
+	quit(0);
+}

@@ -1,0 +1,12 @@
+S = negative | sum | sub | mul | div | rationalNumber | var;
+sum = "(" ws S:l ws "+" ws S:r ws ")" { ArSum(:l, :r)};
+mul = "(" ws S:l ws "*" ws S:r ws ")" { ArMult(:l, :r)};
+div = "(" ws S:l ws "/" ws S:r ws ")" { ArDiv(:l, :r)};
+sub = "(" ws S:l ws "-" ws S:r ws ")" { ArSub(:l, :r)};
+negative = "(" ws "-" ws S:l ws ")" ws {ArNeg(:l)};
+
+var = (letter+digit*)+ $v{ArVar($v)};
+rationalNumber = digit+ $d{RationalNumber(s2i($d), 1)};
+letter = 'a'-'z' | 'A'-'Z';
+digit = '0'-'9';
+ws = (' ' | '\t' | '\n' | '\r')*;

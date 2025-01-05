@@ -1,0 +1,73 @@
+import string;
+import ds/tree;
+
+// типо домашка:
+// дан массив и число m, найти все пары индексов, которые в сумме дают m
+// сначала полный перебор, потом O(log n)
+
+// inds(arr : [int], m : int) -> [Pair<int, int>] {
+
+// }
+
+arr2s(arr : [int]) -> string
+{
+    strGlue(map(arr, i2s), ", ")
+}
+
+outOfbounds(i:int, j:int, arr:[?])->bool
+{
+    if(i<0 ||i>length(arr)-1 || j<0 || j>length(arr)-1){
+        true;
+    }else{
+        false;
+    }
+}
+
+checkPair(i:int, j:int, m:int,  arr:[int])->[Pair<int, int>]
+{
+    if (!outOfbounds(i,j,arr) && arr[i]+arr[j]==m && i!=j) {
+        if (i>=j) {
+            [Pair(i,j)];
+        }else{
+            [];
+        }
+    }else{
+        [];
+    }
+}
+
+findIndeces1(i:int, j:int, m:int, arr:[int])->[Pair<int, int>]//could be done with foldi(foldi)
+{
+    if (i<0 || i>length(arr)-1) {
+        [];
+    }else if(j<0 || j > length(arr)-1){
+        concat(checkPair(i, j, m, arr), findIndeces1(i+1, 0, m, arr));
+    }else{
+        concat(checkPair(i, j, m, arr), findIndeces1(i, j+1, m, arr));
+    }
+}
+
+findIndeces2(arr:[int], m:int)->[Pair<int, int>]//use tree + binary search
+{
+    mt=foldi(
+        arr,makeTree(), \i,acc,n->
+        switch(lookupTree(acc,n)){
+            Some(inds):setTree(acc,n,[i]);
+        }
+    );
+    foldi(arr,[],\i,acc,a->
+        switch (lookupTree(mt,m-a)) {
+            Some(is):concat(acc,map(is,\j->Pair(i,j)));
+            None():acc;
+        }
+    );
+    //1) create tree using foldi and switch
+    //2) look up m-a in the tree via lookupTree and foldi
+}
+
+main(){
+    arr : [int]=[-5, 1, 0, 4, 2];
+    m : int = 1;
+    println(findIndeces1(0,0,m,arr));
+    println(findIndeces2(arr,m))
+}

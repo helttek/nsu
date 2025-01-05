@@ -1,0 +1,135 @@
+import util;
+
+identity(from: ArExpr, to: ArExpr);
+
+makeIdentitiesTree(identities: [identity]) -> Tree<ArExpr, ArExpr> {
+    fold(identities, makeTree(), \acc, ident -> {
+        setTree(acc, ident.from, ident.to)
+        });
+}
+
+decomp(m : Maybe<?>, ifNone : ?) -> ? {
+    switch(m) {
+        Some(v): v;
+        None(): ifNone;
+    }
+}
+
+findIdentities(expr: ArExpr, identitiesTree : Tree<ArExpr, ArExpr>) -> ArExpr {
+    result = switch(decomp(lookupTree(identitiesTree, expr), expr)) {//reslove initial identities
+        ArSum(lhs, rhs): ArSum(findIdentities(lhs, identitiesTree), findIdentities(rhs, identitiesTree));
+        ArSub(lhs, rhs): ArSub(findIdentities(lhs, identitiesTree), findIdentities(rhs, identitiesTree));
+        ArMult(lhs, rhs): ArMult(findIdentities(lhs, identitiesTree), findIdentities(rhs, identitiesTree));
+        ArDiv(lhs, rhs): ArDiv(findIdentities(lhs, identitiesTree), findIdentities(rhs, identitiesTree));
+        ArNeg(val): ArNeg(findIdentities(val, identitiesTree));
+        RationalNumber(n, d): decomp(lookupTree(identitiesTree, expr), RationalNumber(n, d));
+        ArVar(val): decomp(lookupTree(identitiesTree, expr), ArVar(val));
+    }
+    foldTree(identitiesTree, result, \ident, value, acc -> {
+        isMatch = findTemplates(ident, acc, makeTree());
+        isMatch ?? resolveVars(value, isMatch) : acc;
+    });
+}
+
+resolveVars(expr : ArExpr, varResolve : Tree<ArVar, ArExpr>) -> ArExpr {//resolve with extended identities pool
+    switch(expr) {
+        ArSum(lhs, rhs): ArSum(resolveVars(lhs, varResolve), resolveVars(rhs, varResolve));
+        ArSub(lhs, rhs): ArSub(resolveVars(lhs, varResolve), resolveVars(rhs, varResolve));
+        ArDiv(lhs, rhs): ArDiv(resolveVars(lhs, varResolve), resolveVars(rhs, varResolve));
+        ArMult(lhs, rhs): ArMult(resolveVars(lhs, varResolve), resolveVars(rhs, varResolve));
+        RationalNumber(n,d): expr;
+        ArVar(val): decomp(lookupTree(varResolve, expr), expr);
+        ArNeg(val): {
+            var = resolveVars(val, varResolve);
+            switch(var) {
+                RationalNumber(n,d): ArNeg(var);
+                ArVar(v): ArNeg(var);
+                default: ArNeg(RationalNumber(1,1));
+            }
+        }
+    }
+}
+
+findTemplates(templ : ArExpr, expr : ArExpr, identitiesTree : Tree<ArVar, ArExpr>) -> Maybe<Tree<ArVar, ArExpr>> {
+    switch(templ) {
+        ArSum(lhs, rhs): {
+            switch(expr) {
+                ArSum(l, r): {
+                    match = findTemplates(lhs, l, identitiesTree);     
+                    match ?? findTemplates(rhs, r, match) : None();      
+                } 
+                default: None();
+            }
+        }
+        ArSub(lhs, rhs): {
+            switch(expr) {
+                ArSub(l, r): {
+                    match = findTemplates(lhs, l, identitiesTree); 
+                    match ?? findTemplates(rhs, r, match) : None();  
+                }
+                default: None();
+            }
+        }
+        ArMult(lhs, rhs): {
+            switch(expr) {
+                ArMult(l, r): {
+                    match = findTemplates(lhs, l, identitiesTree); 
+                    match ?? findTemplates(rhs, r, match) : None(); 
+                }
+                default: None();
+            }
+        }
+        ArDiv(lhs, rhs): {
+            switch(expr) {
+                ArDiv(l, r): {
+                    match = findTemplates(lhs, l, identitiesTree);
+                    match ?? findTemplates(rhs, r, match) : None();  
+                }
+                default: None();
+            }
+        }
+        RationalNumber(n,d): {
+            switch(expr) {
+                RationalNumber(n1,d1): {
+                    if (templ == expr) {
+                        Some(identitiesTree);
+                    }
+                    else {
+                        None();
+                    }
+                }
+                default: None();
+            }
+        }
+        ArVar(var): {
+            val = lookupTree(identitiesTree, templ);
+            val ?? if (val == expr) Some(identitiesTree) else None() : Some(setTree(identitiesTree, templ, expr));//extend identities pool with more complex variables
+        }
+        ArNeg(val): {
+            switch(expr) {
+                ArNeg(val2): findTemplates(val, val2, identitiesTree);
+                default: None();
+            }
+        }
+    }
+}
+
+main() {
+    idenitties = [
+        identity(Parse("(((x * x) + (2 * x)) + 1)"), Parse("((x - 1) * (x - 1))")),
+        identity(Parse("(x / x)"), Parse("1")),
+        identity(Parse("(1*1)"), Parse("1"))
+    ];
+    str = "(((((x * x) + (2 * x)) + 1) / (((x * x) + (2 * x)) + 1))*(x/x))";
+    println(str);
+    expr = Parse(str);
+    identExpr = findIdentities(expr, makeIdentitiesTree(idenitties));
+    // println(identExpr);
+    println(arexpr2s(identExpr));
+    quit(0);
+}
+
+/*
+Реализуйте функцию упрощения рациональной 
+функции по заданному набору тождеств.
+*/

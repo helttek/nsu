@@ -1,0 +1,306 @@
+import lingo/pegcode/driver;
+import string;
+import math/math;
+
+export {
+    ArExpr ::= ArSum, ArMult, ArDiv, ArSub, ArNeg, ArVar, RationalNumber;
+    ArNeg(val : ArExpr);
+    ArSum(lhs : ArExpr, rhs : ArExpr);
+    ArMult(lhs : ArExpr, rhs : ArExpr);
+    ArDiv(lhs : ArExpr, rhs : ArExpr);
+    ArSub(lhs : ArExpr, rhs : ArExpr);
+    ArVar(val : string);
+    RationalNumber : (num : int, den : int);
+    ArFractNum : (numerator : int, denominator : int);
+
+    Sum(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum>;
+    Sub(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum>;
+    Mult(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum>;
+    Div(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum>;
+    num2s(num : Maybe<ArFractNum>) -> string;
+    calc(arExpr: ArExpr, vars : Tree<string, ArFractNum>) -> Maybe<ArFractNum>;
+    arexpr2s(arExpr: ArExpr) -> string;
+    Parse(str : string) -> ArExpr;
+    getRationalNumber(arExpr : ArExpr) -> ArFractNum;
+    differentiate(arExpr : ArExpr, var : ArVar) -> ArExpr;
+    simplify(arExpr : ArExpr) -> ArExpr;
+}
+
+Sum(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum> {
+    if (isSome(lhs) && isSome(rhs)) {
+        l = either(lhs, ArFractNum(0, 0));
+        r = either(rhs, ArFractNum(0, 0));
+        // a/b + c/d
+        nok = lcm(l.denominator, r.denominator);
+        resNumerator = nok / l.denominator * l.numerator + nok / r.denominator * r.numerator;
+        resDenominator = nok;
+        nod = iabs(gcd(resNumerator, resDenominator));
+        Some(ArFractNum(resNumerator / nod, resDenominator / nod));
+    } else {
+        None();
+    }
+}
+
+Sub(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum> {
+    if (isSome(lhs) && isSome(rhs)) {
+        l = either(lhs, ArFractNum(0, 0));
+        r = either(rhs, ArFractNum(0, 0));
+        // a/b - c/d
+        nok = lcm(l.denominator, r.denominator);
+        resNumerator = nok / l.denominator * l.numerator - nok / r.denominator * r.numerator;
+        resDenominator = nok;
+        nod = iabs(gcd(resNumerator, resDenominator));
+        Some(ArFractNum(resNumerator / nod, resDenominator / nod));
+    } else {
+        None();
+    }
+}
+
+Mult(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum> { 
+    if (isSome(lhs) && isSome(rhs)) {
+        l = either(lhs, ArFractNum(0, 0));
+        r = either(rhs, ArFractNum(0, 0));
+        // a/b * c/d
+        nod_ad = iabs(gcd(l.numerator, r.denominator));
+        nod_bc = iabs(gcd(r.numerator, l.denominator));
+        resNumerator = l.numerator / nod_ad * r.numerator / nod_bc;
+        resDenominator = l.denominator / nod_bc * r.denominator / nod_ad;
+        nod = iabs(gcd(resNumerator, resDenominator));
+        Some(ArFractNum(resNumerator / nod, resDenominator / nod));
+    } else {
+        None();
+    }
+}
+
+Div(lhs : Maybe<ArFractNum>, rhs : Maybe<ArFractNum>) -> Maybe<ArFractNum> {
+    if (isSome(lhs) && isSome(rhs)) {
+        l = either(lhs, ArFractNum(0, 0));
+        r = either(rhs, ArFractNum(0, 0));
+        // (a/b) / (c/d) = (a*d) / (b*c)
+        nod_ac = iabs(gcd(l.numerator, r.numerator));
+        nod_bd = iabs(gcd(l.denominator, r.denominator));
+        resNumerator = l.numerator / nod_ac * r.denominator / nod_bd;
+        resDenominator = l.denominator / nod_bd * r.numerator / nod_ac;
+        if (resDenominator == 0) {
+            None();
+        } else {
+            nod = iabs(gcd(resNumerator, resDenominator));
+            Some(ArFractNum(resNumerator / nod, resDenominator / nod));
+        }
+    } else {
+        None();
+    }
+}
+
+num2s(num : Maybe<ArFractNum>) -> string {
+    if (isSome(num)) {
+        tmp = either(num, ArFractNum(0, 0));
+        if (tmp.denominator == 0) {
+            "Division by zero";
+        } else {
+            if (tmp.denominator == 1){
+                i2s(tmp.numerator);
+            } else {
+                i2s(tmp.numerator) + "/" + i2s(tmp.denominator);
+            }
+        }
+    } else {
+        "Bad number format or division by zero";
+    }
+}
+
+calc(arExpr: ArExpr, vars : Tree<string, ArFractNum>) -> Maybe<ArFractNum> {
+    switch (arExpr) {
+        ArNeg(val): Mult(Some(ArFractNum(-1,1)), calc(val, vars));
+        ArSum(lhs, rhs): Sum(calc(lhs, vars), calc(rhs, vars));
+        ArSub(lhs, rhs): Sub(calc(lhs, vars), calc(rhs, vars));
+        ArMult(lhs, rhs): Mult(calc(lhs, vars), calc(rhs, vars));
+        ArDiv(lhs, rhs): Div(calc(lhs, vars), calc(rhs, vars));
+        RationalNumber(n, d): Some(RationalNumber(n, d));
+        ArVar(val): lookupTree(vars, val);
+    }
+}
+
+arexpr2s(arExpr: ArExpr) -> string {
+    switch (arExpr) {
+        ArNeg(val): "(-" + arexpr2s(val) + ")";
+        ArSum(lhs, rhs): "(" + arexpr2s(lhs) + " + " + arexpr2s(rhs) + ")";
+        ArSub(lhs, rhs): "(" + arexpr2s(lhs) + " - " + arexpr2s(rhs) + ")";
+        ArMult(lhs, rhs): "(" + arexpr2s(lhs) + " * " + arexpr2s(rhs) + ")";
+        ArDiv(lhs, rhs): "(" + arexpr2s(lhs) + " / " + arexpr2s(rhs) + ")";
+        ArVar(val): val;
+        RationalNumber(n, d) :{
+            if(d == 1){
+                i2s(n);
+            }
+            else if(n == 0 && d != 0){
+                i2s(0);
+            }
+            else if(d == 0){
+                "Division by zero.";
+            }
+            else{
+                i2s(n) + "/" + i2s(d);
+            }
+        }
+    }
+}
+
+maybe2val(m : Maybe<ArFractNum>) -> ArFractNum {
+    switch (m) {
+        Some(v): v;
+        None(): ArFractNum(0, 0);
+    }
+}
+
+Parse(str : string) -> ArExpr {
+    compiled_grammar = compilePegGrammar("#include ../algebraic_expr_to_rational_function/main.lingo");
+    parsic(compiled_grammar, str, defaultPegActions);
+}
+
+getRationalNumber(arExpr : ArExpr) -> ArFractNum {
+    switch(arExpr) {
+        ArSum(lhs, rhs): ArFractNum(0, 0);
+        ArSub(lhs, rhs): ArFractNum(0, 0);
+        ArMult(lhs, rhs): ArFractNum(0, 0);
+        ArDiv(lhs, rhs): ArFractNum(0, 0);
+        ArNeg(val): ArFractNum(0, 0);
+        RationalNumber(numerator, denominator): ArFractNum(numerator, denominator);
+        ArVar(val): ArFractNum(0, 0);
+    }
+}
+
+differentiate(arExpr : ArExpr, var : ArVar) -> ArExpr {
+    switch(arExpr) {
+        ArMult(lhs, rhs) : ArSum(ArMult(differentiate(lhs, var), rhs), ArMult(lhs, differentiate(rhs, var)));
+        ArSum(lhs, rhs) : ArSum(differentiate(lhs, var), differentiate(rhs, var));
+        ArDiv(lhs, rhs) : ArDiv(ArSub(ArMult(differentiate(lhs, var), rhs), ArMult(lhs, differentiate(rhs, var))), ArMult(rhs, rhs));
+        ArSub(lhs, rhs) : ArSub(differentiate(lhs, var), differentiate(rhs, var));
+        ArNeg(val) : ArNeg(differentiate(val, var));
+        RationalNumber(n,d) : RationalNumber(0,1);
+        ArVar(val) : {
+            if (val == var.val)
+                RationalNumber(1,1)
+            else
+                RationalNumber(0,1)
+        }
+    }
+}
+
+simplifySum(lhs: ArExpr, rhs: ArExpr) -> ArExpr{
+    l = simplify(lhs);
+    r = simplify(rhs);
+    if (l == RationalNumber(0, 1)) {
+        r;
+    }
+    else if (r == RationalNumber(0, 1)) {
+        l;
+    } else {
+        if (l.structname == "RationalNumber" && r.structname == "RationalNumber") {
+            sum = maybe2val(Sum(Some(getRationalNumber(l)), Some(getRationalNumber(r))));
+            RationalNumber(sum.numerator, sum.denominator);
+        }
+        else {
+           ArSum(l, r);
+        }
+    }
+}
+
+simplifyMult(lhs: ArExpr, rhs:ArExpr) -> ArExpr{
+    l = simplify(lhs);
+    r = simplify(rhs);
+    if (r == RationalNumber(-1,1)) {
+        ArNeg(l);
+    }
+    else if (l == RationalNumber(-1,1)) {
+        ArNeg(r);
+    }
+    else if (r == RationalNumber(0,1)) {
+        RationalNumber(0,1);
+    }
+    else if (l == RationalNumber(0,1)) {
+        RationalNumber(0,1);
+    }
+    else if (r == RationalNumber(1,1)) {
+        l;
+    }
+    else if (l == RationalNumber(1,1)) {
+        r;
+    }
+    else {
+        if (l.structname == "RationalNumber" && r.structname == "RationalNumber") {
+            mult = maybe2val(Mult(Some(getRationalNumber(l)), Some(getRationalNumber(r))));
+            RationalNumber(mult.numerator, mult.denominator);
+        }
+        else {
+            ArMult(l, r);
+        }
+    }
+}
+
+simplifyDiv(lhs: ArExpr, rhs: ArExpr) -> ArExpr{
+    l = simplify(lhs);
+    r = simplify(rhs);
+    if (r == RationalNumber(1,1)) {
+        l;
+    }
+    else if (r == RationalNumber(0,1)) {
+        RationalNumber(0,0);
+    }
+    else if (l == RationalNumber(0,1) && r != RationalNumber(0,1)) {
+        RationalNumber(0,1);
+    }
+    else {
+        if (l.structname == "RationalNumber" && r.structname == "RationalNumber") {
+            div = maybe2val(Mult(Some(getRationalNumber(l)), Some(ArFractNum(getRationalNumber(r).denominator, getRationalNumber(r).numerator))));
+            RationalNumber(div.numerator, div.denominator);
+        }
+        else {
+            ArDiv(l, r);
+        }
+    }
+}
+
+simplifyNeg(val: ArExpr)->ArExpr{
+    tmp = simplify(val);
+    switch (tmp) {
+        ArNeg(v) : v;
+        RationalNumber(n, d) : RationalNumber(0 - n, d);
+        default: ArNeg(tmp);
+    }
+}
+
+simplifySub(lhs: ArExpr, rhs: ArExpr)->ArExpr{
+    l = simplify(lhs);
+    r = simplify(rhs);
+    if(r == RationalNumber(0,1)) {
+        l;
+    }
+    else if(l == RationalNumber(0,1)) {
+        ArNeg(r);
+    }
+    else if(l == r) {
+        RationalNumber(0, 1);
+    }
+    else{
+        if (l.structname == "RationalNumber" && r.structname == "RationalNumber") {
+            minus = maybe2val(Sum(Some(getRationalNumber(l)), Some(ArFractNum(0 - getRationalNumber(r).numerator, getRationalNumber(r).denominator))));
+            RationalNumber(minus.numerator, minus.denominator);
+        }
+        else {
+           ArSub(l, r); 
+        }
+    }
+}
+
+simplify(arExpr : ArExpr) -> ArExpr {
+    switch(arExpr) {
+        ArNeg(val) : simplifyNeg(val);
+        ArSum(lhs, rhs) : simplifySum(lhs, rhs);
+        ArMult(lhs, rhs) : simplifyMult(lhs, rhs);
+        ArDiv(lhs, rhs) : simplifyDiv(lhs, rhs);
+        ArSub(lhs, rhs) : simplify(ArSum(lhs, ArNeg(rhs)));
+        RationalNumber(n, d) : RationalNumber(n, d);
+        ArVar(val) : ArVar(val);
+    }
+}

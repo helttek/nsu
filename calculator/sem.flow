@@ -1,0 +1,38 @@
+import string;
+import ds/tree;
+import lingo/pegcode/driver;
+
+// string2Ar(str:string)->ArExpr{
+//     e_gr="#include arith.lingo";
+//     parsic(compilePegGrammar(r_gr),str,SemanticActions(setTree(defaultPegActions.t,"createInt", \s->ArInt(s2i(s[0])))))
+// }
+
+// language="World, hello" | "World,, goodbye"
+// language="World" "" "hwllo"
+
+// exp=int "+" exp|int;
+// int=digit+$d
+// digit='0'-'9'
+
+//нетерминал:идентификатор
+
+
+//напсиать  peg парсер для грамматики с простыми арифм. выражениями
+//
+
+
+main(){
+    // S = sum | mul | int;
+    // digit = '0'-'9'
+    // int = digit+ $s {ArInt(s2i($s))};
+    // ws=(' '|'\t'|'\n'|'\r')*;
+    // sum = "(" ws S:| ws "+" ws S:r ws")" {ArSum(:|, :r)};
+    // mul = "(" ws S:| ws "*" ws S:r ws")" {ArSum(:|, :r)};
+    // ArExpr ::= ArSum, ArMult, ArInt;
+    //     ArSum(lhs:ArExpr, rhs: ArExpr);
+    //     ArMult(lhs:ArExpr, rhs: ArExpr);
+    //     ArInt(val:int);
+    
+    //TODO: ask for presentation
+    //посторить по строке синтаксическое дерево, затем по деерву воспроизвести исходную строку, затем посчитать выражение
+}
