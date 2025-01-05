@@ -1,0 +1,11 @@
+SELECT
+  e."LAST_NAME",
+  COUNT(e."EMPLOYEE_ID") AS employee_count
+FROM
+  public."EMPLOYEES" e
+GROUP BY
+  e."LAST_NAME"
+HAVING
+  COUNT(e."EMPLOYEE_ID") > 1
+ORDER BY
+  e."LAST_NAME";

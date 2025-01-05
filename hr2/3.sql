@@ -1,0 +1,10 @@
+SELECT e."EMPLOYEE_ID", e."LAST_NAME", e."SALARY", e."DEPARTMENT_ID"
+FROM public."EMPLOYEES" e
+JOIN (
+    SELECT "DEPARTMENT_ID", MIN("SALARY") AS min_salary
+    FROM public."EMPLOYEES"
+    WHERE "DEPARTMENT_ID" IS NOT NULL
+    GROUP BY "DEPARTMENT_ID"
+) department_min ON e."DEPARTMENT_ID" = department_min."DEPARTMENT_ID" AND e."SALARY" = department_min.min_salary
+ORDER BY e."DEPARTMENT_ID", e."SALARY", e."LAST_NAME";
+

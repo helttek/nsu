@@ -1,0 +1,11 @@
+SELECT e."EMPLOYEE_ID", e."LAST_NAME", e."SALARY", e."DEPARTMENT_ID"
+FROM public."EMPLOYEES" e
+JOIN (
+    SELECT "DEPARTMENT_ID", AVG("SALARY") AS avg_salary
+    FROM public."EMPLOYEES"
+    WHERE "DEPARTMENT_ID" IS NOT NULL
+    GROUP BY "DEPARTMENT_ID"
+) department_avg ON e."DEPARTMENT_ID" = department_avg."DEPARTMENT_ID"
+WHERE e."SALARY" > department_avg.avg_salary
+ORDER BY e."DEPARTMENT_ID", e."SALARY", e."LAST_NAME";
+
