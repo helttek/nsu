@@ -12,7 +12,7 @@
 
 .CSEG
 
-.def tmp= r16
+.def tmp = r16
 
 ; initialize interrupt handlers
 .org $0000 rjmp RESET
@@ -49,61 +49,126 @@ RESET:
 	ldi	r16, HIGH(RAMEND)
 	out	SPH, r16
 
-	; enable interrupts
-	sei 	
+	; The PRTIM0 bit in “Power Reduction Register - PRR” on page 39 must be written to zero to enable Timer/Counter0 module.
+	lds   r16, PRR
+    andi  r16, ~(1 << PRTIM0)
+    sts   PRR, r16
 
-// tcra tcrb tcnt timsk
-// interrupt vector table p.51
-// set up interrupt vector at timer overflow
+	; enable interrupts
+	sei
+
+	; setup Timer/Counter0 in normal mode
+	; WGM01:0 = 0
+	ldi   r16, 0x00
+	sts   TCCR0A, r16
+
+	; set Timer/Counter0 control register b:
+	; setup a prescaler of 64
+	ldi   r16, (1<<CS01) | (1<<CS00) ; == 3
+	sts   TCCR0B, r16 
+
+	; enable Timer/Counter0 overflow interrupt
+	ldi   r16, (1<<TOIE0)
+	sts   TIMSK0, r16
+
+	; set result register to 0 to make sure the interrupt handler is working
+	ldi r17, 0
+
+	rjmp loop
+
+
+loop:
+	rjmp loop
+
+
+// interrupt vector table p.58
 //
-// обработать прерывание от переполнения таймера
+// The PRTIM0 bit in “Power Reduction Register - PRR” on page 39 must be written to zero to enable Timer/Counter0 module.
+//
+// Прерывания. Осуществить настройку модуля таймера-счетчика микроконтроллера в базовом режиме счета с произвольным делителем.
+// Настроить вектор прерывания «Переполнение таймера-счетчика». Написать алгоритм обработки прерывания «Переполнения таймера-счетчика».
 
 EXT_INT0:
+	reti
 
 EXT_INT1:
+	reti
 
 PCINT0_handler:
+	reti
 
 PCINT1_handler:
+	reti
 
 PCINT2_handler:
+	reti
 
 WDT:
+	reti
 
 TIM2_COMPA:
+	reti
 
 TIM2_COMPB:
+	reti
 
 TIM2_OVF:
+	reti
 
 TIM1_CAPT:
+	reti
 
 TIM1_COMPA:
+	reti
 
 TIM1_COMPB:
+	reti
 
 TIM1_OVF:
+	reti
 
 TIM0_COMPA:
+	reti
 
 TIM0_COMPB:
+	reti
 
 TIM0_OVF:
+	cli ; disable interrupts when handling an interrupt
+	
+	push r17 
+	ldi r17, 0
+	sts TCCR0B, r17 ; stop the timer (clear clock source, prescaler)
+	pop r17
+
+	inc r17 ; indicating that the interrupt handler has been visited
+
+	sei ; enable interrupts
+	reti
 
 SPI_STC:
+	reti
 
 USART_RXC:
+	reti
 
 USART_UDRE:
+	reti
 
 USART_TXC:
+	reti
 
 ADC_handler:
+	reti
 
 EE_RDY:
+	reti
 
 ANA_COMP:
+	reti
 
 TWI:
+	reti
 
 SPM_RDY:
+	reti
