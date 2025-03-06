@@ -15,7 +15,7 @@
 .def tmp = r16
 
 ; initialize interrupt handlers
-.org $0000 rjmp RESET
+.org $0000 rjmp RESET 
 .org $0002 rjmp EXT_INT0
 .org $0004 rjmp EXT_INT1
 .org $0006 rjmp PCINT0_handler
@@ -52,24 +52,23 @@ RESET:
 	; The PRTIM0 bit in “Power Reduction Register - PRR” on page 39 must be written to zero to enable Timer/Counter0 module.
 	lds   r16, PRR
     andi  r16, ~(1 << PRTIM0)
-    sts   PRR, r16
+    sts PRR, r16
 
 	; enable interrupts
 	sei
 
 	; setup Timer/Counter0 in normal mode
 	; WGM01:0 = 0
-	ldi   r16, 0x00
-	sts   TCCR0A, r16
+	ldi   r16, 0
+	out TCCR0A, r16
 
-	; set Timer/Counter0 control register b:
 	; setup a prescaler of 64
-	ldi   r16, (1<<CS01) | (1<<CS00) ; == 3
-	sts   TCCR0B, r16 
+	ldi   r16, 1; 3 - for 64 prescaler
+	out   TCCR0B, r16 
 
 	; enable Timer/Counter0 overflow interrupt
 	ldi   r16, (1<<TOIE0)
-	sts   TIMSK0, r16
+	sts TIMSK0, r16
 
 	; set result register to 0 to make sure the interrupt handler is working
 	ldi r17, 0
@@ -134,16 +133,19 @@ TIM0_COMPB:
 	reti
 
 TIM0_OVF:
-	cli ; disable interrupts when handling an interrupt
-	
-	push r17 
+	; save status register
+	push r16
+	in r16, SREG
+	push r16
+
 	ldi r17, 0
-	sts TCCR0B, r17 ; stop the timer (clear clock source, prescaler)
-	pop r17
+	out TCCR0B, r17 ; stop the timer (clear clock source, prescaler)
 
-	inc r17 ; indicating that the interrupt handler has been visited
+	ldi r17, 1 ; indicating that the interrupt handler has been visited
 
-	sei ; enable interrupts
+	pop r16
+	out SREG, r16
+	pop r16
 	reti
 
 SPI_STC:
