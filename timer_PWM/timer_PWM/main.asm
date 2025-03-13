@@ -34,7 +34,7 @@
 .org $001A reti
 .org $001C reti
 .org $001E reti
-.org $0020 rjmp TIM0_OVF
+.org $0020 reti
 .org $0022 reti
 .org $0024 reti
 .org $0026 reti
@@ -46,50 +46,29 @@
 .org $0032 reti
 
 RESET:
-	; initialize stack pointer
     ldi	r16, LOW(RAMEND)
 	out	SPL, r16
 	ldi	r16, HIGH(RAMEND)
 	out	SPH, r16
 
-	; The PRTIM0 bit in “Power Reduction Register - PRR” on page 39 must be written to zero to enable Timer/Counter0 module.
-	lds   r16, PRR
-    andi  r16, ~(1 << PRTIM0)
-    sts PRR, r16
+    lds    r16, PRR
+    andi   r16, ~(1 << PRTIM0)
+    sts    PRR, r16 ; power reduction register
 
-	sbi DDRB, PB3
-	
-	; CTC mode
-	ldi  r16, (1 << WGM01)
-    out TCCR0A, r16 
+	; set OC0A as output -- to see the PWM
+	ldi   r16, (1 << PD6)
+	out   DDRD, r16 ; data direction register
 
-	; Toggle OC0A on compare match
-    ldi  r16, (1 << COM0A0)
-    sts  TCCR0A, r16
+	ldi   r16, (1 << COM0A1) | (1 << WGM01) | (1 << WGM00) ; WGM00, WGM01 - set in fast pwm mode, COM0A1 - set non inverted mode
+	out   TCCR0A, r16
 
-    ; Set OCR0A (Compare Match Value)
-    ldi  r16, 249   ; (16MHz / (64 * (249 + 1))) = 1 kHz
-    sts  OCR0A, r16
+	; set 0 prescaling
+	ldi   r16, (1 << CS00)
+	out   TCCR0B, r16
 
-    ; Set Timer0 prescaler to 64
-    ldi  r16, 3; (1 << CS01) | (1 << CS00)
-    sts  TCCR0B, r16
+	; set 50% duty cycle
+	ldi   r16, 127
+	out   OCR0A, r16
 
 loop:
-	rjmp loop
-
-TIM0_OVF:
-	; save status register
-	push r16
-	in r16, SREG
-	push r16
-
-	ldi r17, 0
-	out TCCR0B, r17 ; stop the timer (clear clock source, prescaler)
-
-	ldi r17, 1 ; indicating that the interrupt handler has been visited
-
-	pop r16
-	out SREG, r16
-	pop r16
-	reti
+	rjmp loop            ; Infinite loop to keep the MCU busy
