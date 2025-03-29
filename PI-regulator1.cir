@@ -4,11 +4,17 @@ Version=11.01
 Program=Micro-Cap
 Component Version=10.00
 Shape Version=11.00
-Screen=1920,1080
+Screen=1536,864
 MCAPVersion=11.2.0.3
 Key ID=Demo
-NLCnt=19
+NLCnt=25
 TXCnt=7
+
+[shapedef]
+Name=Absolute
+Root="Plt.root",0,0,0
+Line=40,0,56,-16
+Line=40,0,24,-16
 
 [shapedef]
 Name=Amp
@@ -53,6 +59,15 @@ Line=24,0,24,0
 [shapedef]
 Name=Minus.root
 Line=-2,0,2,0
+
+[shapedef]
+Name=Plt.root
+Rectangle=16,-24,64,24
+FColor=None
+Line=0,0,16,0
+Line=22,0,58,0
+Line=40,-18,40,18
+Line=64,0,80,0
 
 [shapedef]
 Name=Plus.root
@@ -113,7 +128,7 @@ Name=F
 Definition=Macro
 Shape=FofS
 Mask=20480
-Used=22
+Used=23
 memo=Transfer Function Macro
 Label Offset=22,-14,-20,60
 PinCnt=2
@@ -158,6 +173,18 @@ Pin="PinA",a,0,0,-9,-3
 Pin="PinB",a,4,4,8,4
 Pin="PinC",a,8,0,-7,-3
 
+[compdef]
+Name=Abs
+Definition=Macro
+Shape=Absolute
+Mask=20480
+Used=7
+memo=Absolute Value Macro
+Label Offset=20,25,28,28
+PinCnt=2
+Pin="PinA",a,0,0,-11,-3
+Pin="PinB",a,10,0,-6,-3
+
 [Circuit]
 Window Placement=2,3, -1,-1, -8,-31, 0,86,1132,524
 Default Object=Color=#000080
@@ -168,7 +195,6 @@ NodeVoltageFormat=3
 PathDelayFormat=3
 WarningFormat=3
 GridTextFormulaFormat=3
-Window Placement in Transient Analysis=0,1, -1,-1, -8,-31, 0,0,850,642
 SpiceType=AMBIGUOUS
 Title_Block_Border=None
 Title_Block=False
@@ -293,7 +319,7 @@ V=Amp
 
 [Attr]
 ON=54,45,Param:GAIN
-V=0.88875
+V=Ki
 Style=8192
 
 [Attr]
@@ -309,7 +335,7 @@ Pxs=1056,304,1088,304
 [Comp]
 Name=F
 Style=ShowPinText
-Px=728,376
+Px=776,376
 
 [Attr]
 ON=22,-14,PART
@@ -355,23 +381,92 @@ ON=0,0,PACKAGE
 V
 
 [Wire]
-Pxs=728,304,728,376
+Pxs=776,304,776,376
 
 [Wire]
-Pxs=888,376,952,376
+Pxs=936,376,952,376
 
 [Wire]
 Pxs=952,336,952,376
 
 [Wire]
-Pxs=728,304,920,304
+Pxs=728,304,776,304
+
+[Comp]
+Name=Abs
+Style=ShowPinText
+Px=760,576
+
+[Attr]
+ON=20,25,PART
+V=X6
+Style=8192
+
+[Attr]
+ON=20,39,FILE
+V=Abs
+
+[Attr]
+ON=0,0,PACKAGE
+V
+
+[Comp]
+Name=F
+Style=ShowPinText
+Px=912,576
+
+[Attr]
+ON=22,-14,PART
+V=X7
+Style=8192
+
+[Attr]
+ON=22,0,FILE
+V=F
+
+[Attr]
+ON=22,28,Param:FS
+V=1/S
+Style=8192
+
+[Attr]
+ON=0,0,PACKAGE
+V
+
+[Wire]
+Pxs=728,304,728,576
+
+[Wire]
+Pxs=728,576,760,576
+
+[Wire]
+Pxs=776,304,920,304
+
+[Wire]
+Pxs=840,576,912,576
+
+[Grid Text]
+Text=".define Ti 2.5627"
+Px=616,232
+GridSnap=True
+JustifyH=Left
+JustifyV=Bottom
+CBorder=None
+
+[Grid Text]
+Text=".define Ki 0.4527"
+Px=616,216
+GridSnap=True
+JustifyH=Left
+JustifyV=Bottom
+CBorder=None
 
 [Grid Text]
 Text=".define Kcrit 1.975"
 Text=".define Tcrit 7.886"
 Text=".define Ki 0.88875"
 Text=".define Ti 6.57"
-Px=800,104
+Px=808,216
 GridSnap=True
 JustifyH=Left
 JustifyV=Bottom
@@ -379,24 +474,8 @@ Enable=False
 CBorder=None
 
 [Grid Text]
-Text=".define Ti Tcrit/1.2"
-Px=608,104
-GridSnap=True
-JustifyH=Left
-JustifyV=Bottom
-CBorder=None
-
-[Grid Text]
-Text=".define Tcrit 7.886"
-Px=608,120
-GridSnap=True
-JustifyH=Left
-JustifyV=Bottom
-CBorder=None
-
-[Grid Text]
-Text=".define T1  0"
-Px=608,80
+Text=".define T1  2"
+Px=616,192
 GridSnap=True
 JustifyH=Left
 JustifyV=Bottom
@@ -405,7 +484,7 @@ CBorder=None
 
 [Grid Text]
 Text=".define T0  1.23"
-Px=608,64
+Px=616,176
 GridSnap=True
 JustifyH=Left
 JustifyV=Bottom
@@ -417,7 +496,7 @@ Text=".define Kcrit 1.0288"
 Text=".define Tcrit 11.694"
 Text=".define Ki 0.46296"
 Text=".define Ti 9.745"
-Px=976,104
+Px=984,216
 GridSnap=True
 JustifyH=Left
 JustifyV=Bottom
@@ -429,7 +508,7 @@ Text=".define Kcrit 0.795"
 Text=".define Tcrit 15.283"
 Text=".define Ki 0.35775"
 Text=".define Ti 12.736"
-Px=1144,104
+Px=1152,216
 GridSnap=True
 JustifyH=Left
 JustifyV=Bottom
@@ -590,9 +669,9 @@ PrinterScale=1
 Scale 0=1
 Scale 1=1
 Scale 2=1
-SB 3=498,0
+SB 3=482,146
 Scale 3=1
-Px=820,171
+Px=1482,428
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
@@ -699,7 +778,6 @@ ComponentCounts=True
 
 [Transient]
 WinID=1
-Window Placement=0,1, -1,-1, -8,-31, 850,0,1532,642
 Font=Height=-19,FStyle=0,Color=#0000FF,Name=Arial
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
@@ -764,13 +842,6 @@ FFT_IncludeDCHarmonic=False
 FFT_AutoScale_Harmonics="10"
 PrinterAutoTile=No
 PrinterBlackBorder=No
-MonMaxShow=1
-MonPageWidth=66
-MonPlotWidth=21
-MonExprXWidth=142
-MonExprYWidth=306
-MonRangeXWidth=90
-MonRangeYWidth=90
 AnimateWait=None
 AnimateWaitTime=500
 AnimatePressAfter=0
@@ -968,7 +1039,7 @@ Seed=0
 
 [Limits]
 Analysis=Transient
-TRange=100
+TRange=1000
 TStep=0
 NPts=51
 Temp=27
@@ -985,6 +1056,30 @@ Plt=1
 AliasID=2
 XExp=T
 YExp=v(3)
+XRng=AutoAlways
+YRng=AutoAlways
+Options=LINEARX,LINEARY
+Enable=Enable
+Line Color=#FF0000
+Text Color=#FF0000
+Rainbow=False
+VFmtX=3
+VFmtY=3
+ScaleFactorX="None"
+ScaleFactorY="None"
+ScaleUnitsX="Auto"
+ScaleUnitsY="Auto"
+SFmtX=2
+SFmtY=2
+NOFmtX=3E
+NOFmtY=3E
+
+[WaveForm]
+Analysis=Transient
+Plt=1
+AliasID=1
+XExp=T
+YExp=v(8)
 XRng=AutoAlways
 YRng=AutoAlways
 Options=LINEARX,LINEARY
@@ -1036,7 +1131,6 @@ Analysis=Stability
 Analysis=Transient
 Format=3
 ExprPercentWidth=80
-Window Placement=0,1, -1,-1, -1,-1, 0,462,768,642
 
 [WCTolerance]
 Var Width=100
