@@ -6,7 +6,7 @@
 ;
 
 ; initialize interrupt handlers
-.org $0000 rjmp RESET 
+.org $0000 jmp RESET 
 .org $0002 reti
 .org $0004 reti
 .org $0006 reti
@@ -40,3 +40,36 @@ RESET:
 	ldi	r16, HIGH(RAMEND)
 	out	SPH, r16
 
+	ldi r16, 16 ; dividend/result
+	ldi r17, 3 ; divisor
+	rcall div8u
+	
+div8u:
+	push r18 ; loop counter
+
+	cpi r17, 0
+	breq return
+
+	clr r19 ; remainder
+	clc
+	ldi r18, 9
+	rjmp loop
+
+loop:
+	rol r16
+	dec r18
+	breq return
+	rol r19
+	sub r19, r17
+	brlt handle_negative
+	sec
+	rjmp loop
+
+handle_negative:
+	add r19, r17
+	clc
+	rjmp loop
+
+return:
+	pop r18
+	ret
