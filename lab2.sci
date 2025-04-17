@@ -75,14 +75,28 @@ function PlotXYZt()//3.2
 endfunction
 
 function FindRoots()//4.1
-    coeffs=[3.25,7.67,5,0,-11];
+    coeffs=[3.25 7.67 5 0 -11];
     r=roots(coeffs);
-    coeffs1=[2,5,11,7];
+    coeffs_r = [-11 0 5 7.67 3.25];
+    p=poly(coeffs_r, 'x');
+    
+    coeffs1=[2 5 11 7];
+    coeffs1_r = [7 11 5 2];
     r1=roots(coeffs1);
+    p1 = poly(coeffs1_r, 'x');
+    
     disp("First roots: ");
     disp(r);
+    disp("Checking first roots: ");
+    for i = 1:length(r)
+        disp(horner(p, r(i)));
+    end
     disp("Second roots: ");
     disp(r1);
+    disp("Checking second roots: ");
+    for j = 1:length(r1)
+        disp(horner(p1, r1(j)));
+    end
 endfunction
 
 function ExpDataTest()//5.1
