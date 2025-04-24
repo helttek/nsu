@@ -74,30 +74,22 @@ function PlotXYZt()//3.2
     curve1.mark_style = 10;
 endfunction
 
-function FindRoots()//4.1
-    coeffs=[3.25 7.67 5 0 -11];
-    r=roots(coeffs);
-    coeffs_r = [-11 0 5 7.67 3.25];
-    p=poly(coeffs_r, 'x');
-    
-    coeffs1=[2 5 11 7];
-    coeffs1_r = [7 11 5 2];
-    r1=roots(coeffs1);
-    p1 = poly(coeffs1_r, 'x');
-    
-    disp("First roots: ");
+function FindRoots()
+    coeffs = [ 3.25,  7.67,  5,  0, -11 ];
+    r = roots(coeffs);
+    disp("Roots for 3.25 x^4 + 7.67 x^3 + 5 x^2 - 11 = 0:");
     disp(r);
-    disp("Checking first roots: ");
-    for i = 1:length(r)
-        disp(horner(p, r(i)));
-    end
-    disp("Second roots: ");
+    disp("Checking the first roots: ");
+    disp(polyval(coeffs, r));
+
+    coeffs1 = [ 2,  5,  11,  7 ];
+    r1 = roots(coeffs1);
+    disp("Roots for 2 x^3 + 5 x^2 + 11 x + 7 = 0:");
     disp(r1);
-    disp("Checking second roots: ");
-    for j = 1:length(r1)
-        disp(horner(p1, r1(j)));
-    end
-endfunction
+    disp("Checking the second roots: ");
+    disp(polyval(coeffs1, r1));
+end
+
 
 function ExpDataTest()//5.1
     function y = funcR(c, d, k, h)

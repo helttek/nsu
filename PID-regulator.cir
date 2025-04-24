@@ -4,7 +4,7 @@ Version=11.01
 Program=Micro-Cap
 Component Version=10.00
 Shape Version=11.00
-Screen=1536,864
+Screen=1920,1080
 MCAPVersion=11.2.0.3
 Key ID=Demo
 NLCnt=34
@@ -126,7 +126,7 @@ Name=F
 Definition=Macro
 Shape=FofS
 Mask=20480
-Used=27
+Used=29
 memo=Transfer Function Macro
 Label Offset=22,-14,-20,60
 PinCnt=2
@@ -175,7 +175,7 @@ Name=сумматор3
 Definition=Macro
 Shape=Sum3
 Mask=4096
-Used=6
+Used=7
 Label Offset=37,-39,11,37
 PinCnt=4
 Pin="PINA",a,0,0
@@ -196,7 +196,7 @@ Pin="PinA",a,0,0,-11,-3
 Pin="PinB",a,10,0,-6,-3
 
 [Circuit]
-Window Placement=2,3, -1,-1, -8,-31, 0,26,1340,650
+Window Placement=0,1, -1,-1, -8,-31, 790,274,1684,850
 Default Object=Color=#000080
 Default Object Font=Height=-15,FStyle=0,Color=#000080,Name=Arial
 Default Object Apply Border To Text=No
@@ -1128,9 +1128,9 @@ PrinterScale=1
 Scale 0=1
 Scale 1=1
 Scale 2=1
-SB 3=32,48
+SB 3=32,96
 Scale 3=1
-Px=846,391
+Px=271,249
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
