@@ -8,7 +8,7 @@ Screen=1920,1080
 MCAPVersion=11.2.0.3
 Key ID=Demo
 NLCnt=20
-TXCnt=4
+TXCnt=6
 
 [shapedef]
 Name=Amp
@@ -97,7 +97,7 @@ Name=F
 Definition=Macro
 Shape=FofS
 Mask=20480
-Used=30
+Used=34
 memo=Transfer Function Macro
 Label Offset=22,-14,-20,60
 PinCnt=2
@@ -167,12 +167,7 @@ NodeVoltageFormat=3
 PathDelayFormat=3
 WarningFormat=3
 GridTextFormulaFormat=3
-Window Placement in Transient Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
-Window Placement in AC Analysis=0,1, -1,-1, -4,-23, 0,0,905,580
-Window Placement in DC Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
-Window Placement in HmDistortion Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
-Window Placement in ImDistortion Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
-Window Placement in Stability Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
+Window Placement in AC Analysis=0,1, -1,-1, -8,-31, 4,5,916,439
 SpiceType=AMBIGUOUS
 Title_Block_Border=None
 Title_Block=False
@@ -369,6 +364,24 @@ Pxs=192,176,192,208
 Pxs=192,176,336,176
 
 [Grid Text]
+Text=".define phi 28.44"
+Px=408,88
+GridSnap=True
+JustifyH=Left
+JustifyV=Bottom
+Enable=False
+CBorder=None
+
+[Grid Text]
+Text=".define Ka 10.457"
+Px=408,72
+GridSnap=True
+JustifyH=Left
+JustifyV=Bottom
+Enable=False
+CBorder=None
+
+[Grid Text]
 Text=".define T1 0"
 Px=216,96
 GridSnap=True
@@ -556,7 +569,7 @@ Scale 1=1
 Scale 2=1
 SB 3=103,48
 Scale 3=1
-Px=599,413
+Px=549,392
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
 Anchor Color=#000000
@@ -665,7 +678,6 @@ ComponentCounts=True
 
 [Transient]
 WinID=1
-Window Placement=0,3, -1,-1, -4,-23, 0,0,977,562
 Font=Height=-15,FStyle=0,Color=#0000FF,Name=Arial
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
@@ -730,12 +742,6 @@ FFT_IncludeDCHarmonic=False
 FFT_AutoScale_Harmonics="10"
 PrinterAutoTile=No
 PrinterBlackBorder=No
-MonMaxShow=2
-MonPlotWidth=22
-MonExprXWidth=148
-MonExprYWidth=270
-MonRangeXWidth=97
-MonRangeYWidth=97
 AnimateWait=None
 AnimateWaitTime=500
 AnimatePressAfter=0
@@ -879,7 +885,7 @@ Name="Main"
 
 [AC]
 WinID=2
-Window Placement=0,1, -1,-1, -4,-23, 907,-1,1885,579
+Window Placement=0,1, -1,-1, -8,-31, 384,7,1862,840
 Font=Height=-15,FStyle=0,Color=#0000FF,Name=Arial
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
@@ -971,6 +977,7 @@ Num Out Allow Dup Y Expr=False
 Num Out Low="FMIN"
 Num Out High="FMAX"
 Num Out Font=Height=-16,FStyle=0,Color=#000080,Name=Courier New
+Num Out Window Placement=0,1, -1,-1, -8,-31, 15,9,379,843
 Num Out Format=3
 Num Out HideNonSelected=False
 AutoSaveWave=False
@@ -1085,6 +1092,44 @@ ALIGNBOTTOM=No
 [APage]
 Analysis=AC
 Name="Main"
+
+[AObject]
+Analysis=AC
+Object=Ellipse
+CBorder=#000080
+w=0
+AliasID1=2
+Pos=-1.0002159827213826,1.0050595238095239,1.0002159827213823,-1.0017857142857143
+
+[AObject]
+Analysis=AC
+Object=MeasureH
+Locked=True
+EndPoint=ArrowF
+CBorder=#000080
+w=0
+AliasID1=2
+w2=0
+AliasID2=2
+Pos=0.00078275776057085567,0.00056753106274009786,-0.43115782725089369,-0.009673026750098998
+Posm=-0.012571428571428572
+Font=Height=-15,FStyle=0,Color=#0000FF,Name=Arial
+Format=3
+
+[AObject]
+Analysis=AC
+Object=MeasureH
+Locked=True
+EndPoint=ArrowF
+CBorder=#000080
+w=0
+AliasID1=2
+w2=0
+AliasID2=2
+Pos=0.00078275776057085567,0.00056753106274009786,-0.42428152361904331,-0.0028352563422257837
+Posm=-0.012571428571428572
+Font=Height=-15,FStyle=0,Color=#0000FF,Name=Arial
+Format=3
 
 [DC]
 WinID=3
@@ -1373,7 +1418,7 @@ NOFmtY=5
 [Limits]
 Analysis=AC
 FRange=1E1,1e-3
-NPts=1000
+NPts=10000
 Temp=27
 MaxChng=0.02
 NInput=NONE
@@ -1391,10 +1436,10 @@ Plt=1
 AliasID=2
 XExp=re(v(3))
 YExp=im(v(3))
-XRng=0.5,-1
-YRng=0.5,-10
+XRng=1.1,-1.1
+YRng=1.1,-1.1
 Options=OUTPUT,LINEARX,LINEARY
-Range Grid X=0.1
+Range Grid X=0.05
 Enable=Enable
 Line Color=#0000FF
 Text Color=#0000FF

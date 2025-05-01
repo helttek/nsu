@@ -97,7 +97,7 @@ Name=F
 Definition=Macro
 Shape=FofS
 Mask=20480
-Used=30
+Used=34
 memo=Transfer Function Macro
 Label Offset=22,-14,-20,60
 PinCnt=2
@@ -158,7 +158,7 @@ Line=-24,56,232,56
 Line=-24,36,232,36
 
 [Circuit]
-Window Placement=2,3, -1,-1, -8,-31, 30,45,1004,610
+Window Placement=0,1, -1,-1, -8,-31, 30,45,1004,610
 Default Object=Color=#000080
 Default Object Font=Height=-15,FStyle=0,Color=#000080,Name=Arial
 Default Object Apply Border To Text=No
@@ -168,7 +168,7 @@ PathDelayFormat=3
 WarningFormat=3
 GridTextFormulaFormat=3
 Window Placement in Transient Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
-Window Placement in AC Analysis=2,3, -1,-1, -4,-23, 0,0,978,580
+Window Placement in AC Analysis=2,3, -1,-1, -8,-31, 576,-1,1909,849
 Window Placement in DC Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
 Window Placement in HmDistortion Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
 Window Placement in ImDistortion Analysis=0,3, -1,-1, -4,-23, 0,0,978,580
@@ -907,7 +907,7 @@ Name="Main"
 
 [AC]
 WinID=2
-Window Placement=2,3, -1,-1, -4,-23, 0,0,978,580
+Window Placement=2,3, -1,-1, -8,-31, 576,-1,1909,849
 Font=Height=-15,FStyle=0,Color=#0000FF,Name=Arial
 WinBackGround Color=#FFFFFF
 Select Color=#FF0000
@@ -933,7 +933,7 @@ DataPoints=False
 Token=False
 Ruler=False
 XAxisGrids=True
-YAxisGrids=True
+YAxisGrids=False
 MinorLogGrids=True
 BaseLine=False
 AlignZ=True
@@ -999,6 +999,7 @@ Num Out Allow Dup Y Expr=False
 Num Out Low="FMIN"
 Num Out High="FMAX"
 Num Out Font=Height=-16,FStyle=0,Color=#000080,Name=Courier New
+Num Out Window Placement=2,3, -1,-1, -8,-31, 0,0,574,848
 Num Out Format=3
 Num Out HideNonSelected=False
 AutoSaveWave=False
@@ -1400,8 +1401,8 @@ NOFmtY=5
 
 [Limits]
 Analysis=AC
-FRange=1E-1,1e-2
-NPts=1000
+FRange=1E1,1e-3
+NPts=10000
 Temp=27
 MaxChng=0.02
 NInput=NONE
