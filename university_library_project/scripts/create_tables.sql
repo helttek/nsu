@@ -4,8 +4,27 @@ create table
         id smallserial primary key,
         subscription_type char(40),
         number_of_seats smallint check (number_of_seats > 0),
-        status_ char(200) not null DEFAULT "Inactive",
+        status_ char(200) not null DEFAULT 'Inactive',
         name_ varchar(350)
+    );
+
+
+create table
+    event_type (
+        id smallserial primary key,
+        name_ char(300) not null unique
+    );
+
+create table
+    restriction (
+        id smallserial primary key,
+        description_ char(500) not null unique
+    );
+
+create table
+    library_card_status (
+        id smallserial primary key,
+        info varchar(100) not null unique
     );
 
 create table
@@ -13,32 +32,13 @@ create table
         id smallserial primary key,
         name_ char(350) not null,
         violation_date date,
-        penalty char(500) not null,
-        penalty_duration_until date
-    );
-
-create table
-    event_type (
-        id smallserial primary key,
-        name_ char(300) not null
-    );
-
-create table
-    restriction (
-        id smallserial primary key,
-        description_ char(500) not null
-    );
-
-create table
-    library_card_status (
-        id smallserial primary key,
-        info varchar(100) not null
+        restriction_id smallint references restriction(id) on update cascade on delete set null
     );
 
 create table
     publication_status (
         id smallserial primary key,
-        info varchar(100) not null
+        info varchar(100) not null unique
     );
 
 create table
@@ -48,7 +48,7 @@ create table
         author varchar(400),
         publishing_date date,
         publishing_office varchar(400),
-        price money not null check (price > '0.00'::money),
+        price money not null check (price > 0.00::money),
         status_id smallint references publication_status (id) on update cascade on delete set null
     );
 
@@ -153,5 +153,3 @@ create table library_card_reregistration(
     pickup_point_id smallint not null references pickup_point(id) on update cascade on delete set null
 );
 
-ALTER TABLE pickup_point
-ALTER COLUMN status_ SET DEFAULT 'Inactive';
