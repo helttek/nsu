@@ -1,1 +1,1 @@
-# Some source materials for "Data bases" subject at NSU
+# Some source materials for "Databases" subject at NSU
