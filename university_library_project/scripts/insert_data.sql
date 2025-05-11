@@ -27,7 +27,7 @@ INSERT INTO pickup_point (id, subscription_type, number_of_seats, status_, name_
 (4, 'Читальный зал', 75, 'Active', 'Читальный зал №2 (Технические науки)'),
 (5, 'Межбиблиотечный абонемент', NULL, 'Active', 'Отдел МБА'),
 (6, 'Абонемент', NULL, 'Inactive', 'Абонемент редких книг'),
-(7, 'Читальный зал', 60, 'Active', 'Читальный зал периодики'),
+(7, 'Читальный зал', 60, 'Active', 'Читальный зал периодики');
 
 -- 2. event_type
 INSERT INTO event_type (id, name_) VALUES
