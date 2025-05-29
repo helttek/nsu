@@ -1,0 +1,41 @@
+<circuit version="1.1.0-SR1" rev="2005" stepSize="1000000" stepsPS="1000000" NLsteps="100000" reaStep="1000000" animate="0" >
+
+<item itemtype="MCU" CircId="mega168-1" mainComp="false" Show_id="true" Show_Val="false" Pos="596,552" rotation="0" hflip="1" vflip="1" label="mega168-1" idLabPos="0,-20" labelrot="0" valLabPos="-16,20" valLabRot="0" Frequency="16 MHz" Program="../../../../microcontrollers/slave/slave/Debug/slave.hex" Auto_Load="false" saveEepr="true" Logic_Symbol="false" Rst_enabled="false" Ext_Osc="false" Wdt_enabled="false" Clk_Out="false" MainMcu="true" SerialMon="-1" />
+
+<item itemtype="MCU" CircId="mega168-2" mainComp="false" Show_id="true" Show_Val="false" Pos="832,548" rotation="0" hflip="-1" vflip="1" label="mega168-2" idLabPos="0,-20" labelrot="0" valLabPos="-16,20" valLabRot="0" Frequency="16 MHz" Program="../../../../microcontrollers/master/master/Debug/master.hex" Auto_Load="false" saveEepr="true" Logic_Symbol="false" Rst_enabled="false" Ext_Osc="false" Wdt_enabled="false" Clk_Out="false" MainMcu="false" SerialMon="-1" />
+
+<item itemtype="LAnalizer" CircId="LAnalizer-3" mainComp="false" Show_id="false" Show_Val="false" Pos="852,448" rotation="0" hflip="1" vflip="1" label="LAnalizer-3" idLabPos="-90,-100" labelrot="0" valLabPos="-16,20" valLabRot="0" Basic_X="135 _px" Basic_Y="135 _px" BufferSize="100000" connectGnd="true" InputImped="10 MΩ" TimDiv="69030000000" TimPos="0" VolDiv="0.15" Tunnels="SS,CLK,MISO,MOSI,,,,," Trigger="9" TimeStep="1000 _ps" AutoExport="false" TresholdR="2.5 V" Bus="false,false,false,false,false,false,false,false," TresholdF="2.5 V" />
+
+<item itemtype="Node" CircId="Node-9" mainComp="false" Pos="652,656" />
+
+<item itemtype="Node" CircId="Node-12" mainComp="false" Pos="660,632" />
+
+<item itemtype="Node" CircId="Node-22" mainComp="false" Pos="676,648" />
+
+<item itemtype="Node" CircId="Node-23" mainComp="false" Pos="668,640" />
+
+<item itemtype="Connector" uid="connector-6" startpinid="mega168-1-PORTB2" endpinid="Node-9-0" pointList="636,656,652,656" />
+
+<item itemtype="Connector" uid="connector-7" startpinid="mega168-1-PORTB5" endpinid="Node-12-0" pointList="636,632,660,632" />
+
+<item itemtype="Connector" uid="Connector-8" startpinid="LAnalizer-3-Pin0" endpinid="Node-9-1" pointList="764,384,652,384,652,656" />
+
+<item itemtype="Connector" uid="Connector-10" startpinid="Node-9-2" endpinid="mega168-2-PORTB2" pointList="652,656,684,656,684,668,724,668,724,652,792,652" />
+
+<item itemtype="Connector" uid="Connector-11" startpinid="LAnalizer-3-Pin1" endpinid="Node-12-1" pointList="764,400,660,400,660,632" />
+
+<item itemtype="Connector" uid="Connector-13" startpinid="Node-12-2" endpinid="mega168-2-PORTB5" pointList="660,632,716,632,716,628,792,628" />
+
+<item itemtype="Connector" uid="Connector-31" startpinid="Node-22-1" endpinid="mega168-2-PORTB3" pointList="676,648,792,648,792,644" />
+
+<item itemtype="Connector" uid="Connector-32" startpinid="LAnalizer-3-Pin3" endpinid="Node-22-0" pointList="764,432,676,432,676,648" />
+
+<item itemtype="Connector" uid="Connector-33" startpinid="Node-22-2" endpinid="mega168-1-PORTB3" pointList="676,648,636,648" />
+
+<item itemtype="Connector" uid="Connector-34" startpinid="Node-23-1" endpinid="mega168-2-PORTB4" pointList="668,640,792,640,792,636" />
+
+<item itemtype="Connector" uid="Connector-35" startpinid="mega168-1-PORTB4" endpinid="Node-23-0" pointList="636,640,668,640" />
+
+<item itemtype="Connector" uid="Connector-36" startpinid="Node-23-2" endpinid="LAnalizer-3-Pin2" pointList="668,640,668,416,764,416" />
+
+</circuit>
