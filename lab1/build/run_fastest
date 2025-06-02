@@ -1,0 +1,8 @@
+#!/bin/zsh
+
+g++ -O$1 -fprofile-generate -o ./lab1 ../lab1.cpp
+
+./lab1
+
+g++ -O$1 -fprofile-use -o ./lab1 ../lab1.cpp
+

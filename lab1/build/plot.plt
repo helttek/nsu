@@ -1,5 +1,5 @@
-nx=200
-ny=200
+nx=100
+ny=100
 filename="double.dat"
 set terminal png size 700,600
 set output filename.".png"
