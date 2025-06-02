@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - c:\work\nsu-fastapi\nginx\ssl:/etc/nginx/ssl
+      - c:\work\nsu-fastapi\nginx\nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - fastapi
+
+  fastapi:
+    build: .
+    ports:
+      - "9090:9090"
+
+  pgsql:
+    #image: postgres:latest 
+    build: ./pgsql_image
+    ports:
+      - "5432:5432" 
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: testpassword 
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata: 
