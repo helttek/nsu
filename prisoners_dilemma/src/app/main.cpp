@@ -1,7 +1,7 @@
-#include <string>
-#include <vector>
+#include "prisoners_dilemma.hpp"
 
 int main(int argc, char **argv) {
-  std::vector<std::string> args(argv, argv + argc);
+  PrisonersDilemmaApp prisoners_dilemma(argc, argv);
+  prisoners_dilemma.Start();
   return 0;
 }
