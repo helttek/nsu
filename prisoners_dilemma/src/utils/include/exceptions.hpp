@@ -8,8 +8,8 @@ public:
       : std::runtime_error(message) {}
 };
 
-class InvalidOption : public std::runtime_error {
+class InvalidOption : public std::invalid_argument {
 public:
   explicit InvalidOption(const std::string &message)
-      : std::runtime_error(message) {}
+      : std::invalid_argument(message) {}
 };
