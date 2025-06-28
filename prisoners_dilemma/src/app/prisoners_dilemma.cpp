@@ -1,5 +1,5 @@
 #include "prisoners_dilemma.hpp"
-#include "../utils/include/exceptions.hpp"
+#include "exceptions.hpp"
 
 #include <cstddef>
 #include <filesystem>
@@ -10,128 +10,181 @@
 #include <system_error>
 
 PrisonersDilemmaApp::PrisonersDilemmaApp(int argc, char **argv)
-    : args(argv, argv + argc), stratsToPlay(6),
-      optionNames({"mode", "steps", "configs", "matrix"}),
-      availableModes({"detailed", "fast", "tournament"}) {
+    : args(argv, argv + argc),
+      strategies({"tough-tit-for-tat", "soft-tit-for-tat", "go-by-majority", "all-cooperate",
+                  "all-defect", "random"}),
+      availableModes({"detailed", "fast", "tournament"}), configsDirectory(),
+      steps(-1), mode(""), matrixFile()
+{
   ValidateArgs();
+  LoadRules();
 }
 
 void PrisonersDilemmaApp::Start() {}
 
-void PrisonersDilemmaApp::ValidateArgs() {
-  for (int i = 1; i < this->args.size(); ++i) {
+void PrisonersDilemmaApp::ValidateArgs()
+{
+  for (int i = 1; i < this->args.size(); ++i)
+  {
     // std::cout << args[i] << std::endl;
 
-    if (!CheckIfOption(args[i])) {
-      stratsToPlay.push_back(args[i]);
+    if (!CheckIfOption(args[i]))
+    {
+      try
+      {
+        ValidateStrat(args[i]);
+      }
+      catch (const NotAStrat &e)
+      {
+        std::cout << "Failed to validate strategy: " << e.what() << std::endl;
+      }
     }
   }
-  ValidateStrats();
+  ValidateStratsFromConfigsDir();
+  if (stratsToPlay.size() < 3)
+  {
+    throw std::runtime_error(
+        "Failed to start the game: at least 3 strategies needed, only " +
+        std::to_string(stratsToPlay.size()) + " provided.");
+  }
 }
 
-void PrisonersDilemmaApp::CheckIfMode(const std::string &m) {
+void PrisonersDilemmaApp::CheckIfMode(const std::string &m)
+{
   std::string modeString("--mode=");
   size_t pos = m.find(modeString);
-  if (pos == std::string::npos) {
+  if (pos == std::string::npos)
+  {
     throw NotAnOption("[" + m + "] " + "not an option.");
   }
-  if (pos) {
+  if (pos)
+  {
     throw NotAnOption(
         "[" + m + "] " +
         "not an option (maybe you meant \"--mode=<mode_name>\").");
   }
-  if (pos >= m.size()) {
+  if (pos >= m.size())
+  {
     throw InvalidOption("invalid mode []");
   }
   std::string tmp = m.substr(modeString.size());
-  if (!IsValidMode(tmp)) {
+  if (!IsValidMode(tmp))
+  {
     throw InvalidOption("invalid mode [" + m + "].");
   }
   this->mode = tmp;
 }
 
-int PrisonersDilemmaApp::IsValidMode(const std::string &m) {
-  for (auto availableMode : availableModes) {
-    if (m == availableMode) {
+int PrisonersDilemmaApp::IsValidMode(const std::string &m)
+{
+  for (auto availableMode : availableModes)
+  {
+    if (m == availableMode)
+    {
       return 1;
     }
   }
   return 0;
 }
 
-void PrisonersDilemmaApp::CheckIfStepsOption(const std::string &so) {
+void PrisonersDilemmaApp::CheckIfStepsOption(const std::string &so)
+{
   std::string stepsString("--steps=");
   size_t pos = so.find(stepsString);
-  if (pos == std::string::npos) {
+  if (pos == std::string::npos)
+  {
     throw NotAnOption("[" + so + "] " + "not an option.");
   }
-  if (pos) {
+  if (pos)
+  {
     throw NotAnOption(
         "[" + so + "] " +
         "not an option (maybe you meant \"--steps=<number_of_steps>\").");
   }
-  if (stepsString.size() >= so.size()) {
+  if (stepsString.size() >= so.size())
+  {
     throw InvalidOption("invalid number of steps []");
   }
   int tmp = IsValidStepsOption(so.substr(stepsString.size()));
-  if (tmp <= 0) {
+  if (tmp <= 0)
+  {
     throw InvalidOption("invalid number of steps [" + so + "].");
   }
   this->steps = tmp;
 }
 
-int PrisonersDilemmaApp::IsValidStepsOption(const std::string &so) {
-  try {
+int PrisonersDilemmaApp::IsValidStepsOption(const std::string &so)
+{
+  try
+  {
     int t = std::stoi(so);
     return t;
-  } catch (const std::invalid_argument &e) {
+  }
+  catch (const std::invalid_argument &e)
+  {
     return -1;
   }
 }
 
-void PrisonersDilemmaApp::CheckIfConfigsOption(const std::string &co) {
+void PrisonersDilemmaApp::CheckIfConfigsOption(const std::string &co)
+{
   std::string configsString("--configs=");
   size_t pos = co.find(configsString);
-  if (pos == std::string::npos) {
+  if (pos == std::string::npos)
+  {
     throw NotAnOption("[" + co + "] " + "not an option.");
   }
-  if (pos) {
+  if (pos)
+  {
     throw NotAnOption("[" + co + "] " +
                       "not an option (maybe you meant "
                       "\"--configs=<path_to_configs_directory>\").");
   }
-  if (configsString.size() >= co.size()) {
+  if (configsString.size() >= co.size())
+  {
     throw InvalidOption("invalid path to configs directory []");
   }
-  try {
+  try
+  {
     std::filesystem::path tmp =
         IsValidConfigsOption(co.substr(configsString.size()));
     this->configsDirectory = tmp;
-  } catch (const std::filesystem::filesystem_error &e) {
+  }
+  catch (const std::filesystem::filesystem_error &e)
+  {
     throw InvalidOption(e.what());
   }
 }
 
 std::filesystem::path
-PrisonersDilemmaApp::IsValidConfigsOption(const std::string &co) {
+PrisonersDilemmaApp::IsValidConfigsOption(const std::string &co)
+{
   std::filesystem::path path(co);
   std::error_code ec;
 
-  if (!std::filesystem::exists(path, ec)) {
-    if (ec) {
+  if (!std::filesystem::exists(path, ec))
+  {
+    if (ec)
+    {
       throw std::filesystem::filesystem_error(
           "error while checking path (" + ec.message() + ").", ec);
-    } else {
+    }
+    else
+    {
       throw std::filesystem::filesystem_error(
           "path [" + co + "] doesn't exist.", ec);
     }
   }
-  if (!std::filesystem::is_directory(path, ec)) {
-    if (ec) {
+  if (!std::filesystem::is_directory(path, ec))
+  {
+    if (ec)
+    {
       throw std::filesystem::filesystem_error(
           "error while checking if path is directory (" + ec.message() + ").",
           ec);
-    } else {
+    }
+    else
+    {
       throw std::filesystem::filesystem_error(
           "path [" + co + "] exists, but not a directory.", ec);
     }
@@ -139,50 +192,66 @@ PrisonersDilemmaApp::IsValidConfigsOption(const std::string &co) {
   return std::filesystem::path(path);
 }
 
-void PrisonersDilemmaApp::CheckIfMatrixOption(const std::string &mo) {
+void PrisonersDilemmaApp::CheckIfMatrixOption(const std::string &mo)
+{
   std::string matrixString("--matrix=");
   size_t pos = mo.find(matrixString);
-  if (pos == std::string::npos) {
+  if (pos == std::string::npos)
+  {
     throw NotAnOption("[" + mo + "] " + "not an option.");
   }
-  if (pos) {
+  if (pos)
+  {
     throw NotAnOption(
         "[" + mo + "] " +
         "not an option (maybe you meant \"--matrix=<filename>\").");
   }
-  if (matrixString.size() >= mo.size()) {
+  if (matrixString.size() >= mo.size())
+  {
     throw InvalidOption("invalid matrix file []");
   }
-  try {
+  try
+  {
     std::filesystem::path tmp =
         IsValidMatrixOption(mo.substr(matrixString.size()));
     this->matrixFile = tmp;
-  } catch (const std::filesystem::filesystem_error &e) {
+  }
+  catch (const std::filesystem::filesystem_error &e)
+  {
     throw InvalidOption(e.what());
   }
 }
 
 std::filesystem::path
-PrisonersDilemmaApp::IsValidMatrixOption(const std::string &mo) {
+PrisonersDilemmaApp::IsValidMatrixOption(const std::string &mo)
+{
   std::filesystem::path path(mo);
   std::error_code ec;
 
-  if (!std::filesystem::exists(path, ec)) {
-    if (ec) {
+  if (!std::filesystem::exists(path, ec))
+  {
+    if (ec)
+    {
       throw std::filesystem::filesystem_error(
           "error while checking path (" + ec.message() + ").", ec);
-    } else {
+    }
+    else
+    {
       throw std::filesystem::filesystem_error(
           "path [" + mo + "] doesn't exist.", ec);
     }
   }
-  if (!std::filesystem::is_regular_file(path, ec)) {
-    if (ec) {
+  if (!std::filesystem::is_regular_file(path, ec))
+  {
+    if (ec)
+    {
       throw std::filesystem::filesystem_error(
           "error while checking if path is regular file (" + ec.message() +
               ").",
           ec);
-    } else {
+    }
+    else
+    {
       throw std::filesystem::filesystem_error(
           "path [" + mo + "] exists, but not a regular file.", ec);
     }
@@ -190,39 +259,60 @@ PrisonersDilemmaApp::IsValidMatrixOption(const std::string &mo) {
   return std::filesystem::path(path);
 }
 
-int PrisonersDilemmaApp::CheckIfOption(const std::string &option) {
-  try {
+int PrisonersDilemmaApp::CheckIfOption(const std::string &option)
+{
+  try
+  {
     CheckIfMode(option);
     return 1;
-  } catch (NotAnOption) {
-  } catch (const InvalidOption &e) {
+  }
+  catch (NotAnOption)
+  {
+  }
+  catch (const InvalidOption &e)
+  {
     std::cout << "Failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
-  try {
+  try
+  {
     CheckIfStepsOption(option);
     return 1;
-  } catch (NotAnOption) {
-  } catch (const InvalidOption &e) {
+  }
+  catch (NotAnOption)
+  {
+  }
+  catch (const InvalidOption &e)
+  {
     std::cout << "Failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
-  try {
+  try
+  {
     CheckIfConfigsOption(option);
     return 1;
-  } catch (NotAnOption) {
-  } catch (const InvalidOption &e) {
+  }
+  catch (NotAnOption)
+  {
+  }
+  catch (const InvalidOption &e)
+  {
     std::cout << "Failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
-  try {
+  try
+  {
     CheckIfMatrixOption(option);
     return 1;
-  } catch (NotAnOption) {
-  } catch (const InvalidOption &e) {
+  }
+  catch (NotAnOption)
+  {
+  }
+  catch (const InvalidOption &e)
+  {
     std::cout << "Failed to validate option: " << e.what() << std::endl;
     return -1;
   }
@@ -230,4 +320,43 @@ int PrisonersDilemmaApp::CheckIfOption(const std::string &option) {
   return 0;
 }
 
-void PrisonersDilemmaApp::ValidateStrats() {}
+void PrisonersDilemmaApp::ValidateStratsFromConfigsDir()
+{
+  if (!this->configsDirectory.empty())
+  {
+    LoadStrategisFromConfigsDirectory();
+  }
+  // TODO: create static method in Strategy class that will validate strats in
+  // configs directory
+}
+
+void PrisonersDilemmaApp::LoadStrategisFromConfigsDirectory() {}
+
+void PrisonersDilemmaApp::ValidateStrat(const std::string &strat)
+{
+  for (auto strategy : this->strategies)
+  {
+    if (strat == strategy)
+    {
+      this->stratsToPlay.insert(strat);
+      return;
+    }
+  }
+  throw NotAStrat("unknown strategy name \"" + strat + "\".");
+}
+
+void PrisonersDilemmaApp::LoadRules()
+{
+  if (!this->matrixFile.empty())
+  {
+    LoadRulesFromFile();
+  }
+  else
+  {
+    LoadDefaultRules();
+  }
+}
+
+void PrisonersDilemmaApp::LoadDefaultRules() {}
+
+void PrisonersDilemmaApp::LoadRulesFromFile() {}

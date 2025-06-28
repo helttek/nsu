@@ -1,10 +1,12 @@
 #pragma once
 
 #include <filesystem>
+#include <set>
 #include <string>
 #include <vector>
 
-class PrisonersDilemmaApp {
+class PrisonersDilemmaApp
+{
 public:
   PrisonersDilemmaApp(int argc, char **argv);
   ~PrisonersDilemmaApp() = default;
@@ -13,16 +15,17 @@ public:
 
 private:
   std::vector<std::string> args;
-  std::vector<std::string> stratsToPlay;
 
+  // provided option values
+  std::set<std::string> stratsToPlay;
   std::string mode;
   int steps;
   std::filesystem::path configsDirectory;
   std::filesystem::path matrixFile;
 
-  std::vector<std::string> availableModes;
-  std::vector<std::string> availableStepsValues;
-  std::vector<std::string> optionNames;
+  // options limits
+  std::set<std::string> availableModes;
+  std::set<std::string> strategies;
 
   void ValidateArgs();
   int CheckIfOption(const std::string &option);
@@ -34,6 +37,13 @@ private:
   std::filesystem::path IsValidConfigsOption(const std::string &co);
   void CheckIfMatrixOption(const std::string &mo);
   std::filesystem::path IsValidMatrixOption(const std::string &mo);
+  void ValidateStrat(const std::string &strat);
 
-  void ValidateStrats();
+  void ValidateStratsFromConfigsDir();
+  void LoadRules();
+
+  void LoadStrategisFromConfigsDirectory();
+
+  void LoadRulesFromFile();
+  void LoadDefaultRules();
 };

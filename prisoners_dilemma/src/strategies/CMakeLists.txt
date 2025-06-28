@@ -4,5 +4,10 @@ project(strategies)
 
 add_subdirectory(api)
 
-add_subdirectory(always_cooperate)
-add_subdirectory(tit_for_tat)
+add_subdirectory(all-cooperate)
+add_subdirectory(all-defect)
+add_subdirectory(go-by-majority)
+add_subdirectory(random)
+add_subdirectory(soft-tit-for-tat)
+add_subdirectory(tough-tit-for-tat)
+add_subdirectory(combined)
