@@ -1,16 +1,9 @@
 class Strategy
 {
-private:
-    /* data */
 public:
     Strategy();
-    ~Strategy();
+    ~Strategy(); 
+
+private:
+    /* data */
 };
-
-Strategy::Strategy()
-{
-}
-
-Strategy::~Strategy()
-{
-}

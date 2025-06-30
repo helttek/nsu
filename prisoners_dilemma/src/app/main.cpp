@@ -1,8 +1,18 @@
 #include "prisoners_dilemma.hpp"
 
+#include <iostream>
+
 int main(int argc, char **argv)
 {
-  PrisonersDilemmaApp prisoners_dilemma(argc, argv);
-  prisoners_dilemma.Start();
+  try
+  {
+    PrisonersDilemmaApp prisonersDilemma(argc, argv);
+    prisonersDilemma.Start();
+  }
+  catch (const std::runtime_error &e)
+  {
+    std::cout << e.what() << std::endl;
+  }
+
   return 0;
 }

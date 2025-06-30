@@ -39,11 +39,14 @@ private:
   std::filesystem::path IsValidMatrixOption(const std::string &mo);
   void ValidateStrat(const std::string &strat);
 
-  void ValidateStratsFromConfigsDir();
+  void LoadStratsFromConfigsDir();
   void LoadRules();
 
   void LoadStrategisFromConfigsDirectory();
 
   void LoadRulesFromFile();
   void LoadDefaultRules();
+
+  void LoadStrategies();
+  void PrepareGameMode();
 };

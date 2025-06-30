@@ -3,7 +3,7 @@ project(stratery_api)
 
 add_library(strategy_api STATIC
     src/strategy_factory.cpp
-    src/strategy_loader.cpp 
+    src/strategy.cpp 
 )
 
 target_include_directories(strategy_api PUBLIC

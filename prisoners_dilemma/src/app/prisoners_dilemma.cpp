@@ -16,18 +16,48 @@ PrisonersDilemmaApp::PrisonersDilemmaApp(int argc, char **argv)
       availableModes({"detailed", "fast", "tournament"}), configsDirectory(),
       steps(-1), mode(""), matrixFile()
 {
-  ValidateArgs();
-  LoadRules();
+  try
+  {
+    ValidateArgs();
+    LoadRules();
+    LoadStrategies();
+    PrepareGameMode();
+  }
+  catch (const std::runtime_error &e)
+  {
+    std::cerr << "Failed to create game: " << e.what() << std::endl;
+  }
 }
 
-void PrisonersDilemmaApp::Start() {}
+void PrisonersDilemmaApp::Start()
+{
+}
+
+void PrisonersDilemmaApp::LoadStrategies()
+{
+}
+
+void PrisonersDilemmaApp::PrepareGameMode()
+{
+  if (this->mode == "detailed")
+  {
+    /* code */
+  }
+  if (this->mode == "fast")
+  {
+    /* code */
+  }
+  if (this->mode == "tournament")
+  {
+    /* code */
+  }
+  throw std::runtime_error("failed to prepare game mode: unknown game mode");
+}
 
 void PrisonersDilemmaApp::ValidateArgs()
 {
   for (int i = 1; i < this->args.size(); ++i)
   {
-    // std::cout << args[i] << std::endl;
-
     if (!CheckIfOption(args[i]))
     {
       try
@@ -36,15 +66,14 @@ void PrisonersDilemmaApp::ValidateArgs()
       }
       catch (const NotAStrat &e)
       {
-        std::cout << "Failed to validate strategy: " << e.what() << std::endl;
+        std::cout << "failed to validate strategy: " << e.what() << std::endl;
       }
     }
   }
-  ValidateStratsFromConfigsDir();
   if (stratsToPlay.size() < 3)
   {
     throw std::runtime_error(
-        "Failed to start the game: at least 3 strategies needed, only " +
+        "at least 3 strategies needed, only " +
         std::to_string(stratsToPlay.size()) + " provided.");
   }
 }
@@ -271,7 +300,7 @@ int PrisonersDilemmaApp::CheckIfOption(const std::string &option)
   }
   catch (const InvalidOption &e)
   {
-    std::cout << "Failed to validate option: " << e.what() << std::endl;
+    std::cout << "failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
@@ -285,7 +314,7 @@ int PrisonersDilemmaApp::CheckIfOption(const std::string &option)
   }
   catch (const InvalidOption &e)
   {
-    std::cout << "Failed to validate option: " << e.what() << std::endl;
+    std::cout << "failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
@@ -299,7 +328,7 @@ int PrisonersDilemmaApp::CheckIfOption(const std::string &option)
   }
   catch (const InvalidOption &e)
   {
-    std::cout << "Failed to validate option: " << e.what() << std::endl;
+    std::cout << "failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
@@ -313,24 +342,12 @@ int PrisonersDilemmaApp::CheckIfOption(const std::string &option)
   }
   catch (const InvalidOption &e)
   {
-    std::cout << "Failed to validate option: " << e.what() << std::endl;
+    std::cout << "failed to validate option: " << e.what() << std::endl;
     return -1;
   }
 
   return 0;
 }
-
-void PrisonersDilemmaApp::ValidateStratsFromConfigsDir()
-{
-  if (!this->configsDirectory.empty())
-  {
-    LoadStrategisFromConfigsDirectory();
-  }
-  // TODO: create static method in Strategy class that will validate strats in
-  // configs directory
-}
-
-void PrisonersDilemmaApp::LoadStrategisFromConfigsDirectory() {}
 
 void PrisonersDilemmaApp::ValidateStrat(const std::string &strat)
 {
