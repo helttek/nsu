@@ -1,5 +1,7 @@
 #include "prisoners_dilemma.hpp"
 #include "exceptions.hpp"
+#include "matrix.hpp"
+#include "strategy_factory.hpp"
 
 #include <cstddef>
 #include <filesystem>
@@ -35,21 +37,22 @@ void PrisonersDilemmaApp::Start()
 
 void PrisonersDilemmaApp::LoadStrategies()
 {
+  StrategyFactory stratFactory();
 }
 
 void PrisonersDilemmaApp::PrepareGameMode()
 {
   if (this->mode == "detailed")
   {
-    /* code */
+    return;
   }
   if (this->mode == "fast")
   {
-    /* code */
+    return;
   }
   if (this->mode == "tournament")
   {
-    /* code */
+    return;
   }
   throw std::runtime_error("failed to prepare game mode: unknown game mode");
 }
@@ -76,6 +79,7 @@ void PrisonersDilemmaApp::ValidateArgs()
         "at least 3 strategies needed, only " +
         std::to_string(stratsToPlay.size()) + " provided.");
   }
+  this->mode = (stratsToPlay.size() == 3) ? "detailed" : "tournament";
 }
 
 void PrisonersDilemmaApp::CheckIfMode(const std::string &m)
@@ -364,16 +368,20 @@ void PrisonersDilemmaApp::ValidateStrat(const std::string &strat)
 
 void PrisonersDilemmaApp::LoadRules()
 {
-  if (!this->matrixFile.empty())
+  try
   {
-    LoadRulesFromFile();
+    this->matrix = (!this->matrixFile.empty()) ? Matrix::LoadRulesFromFile(this->matrixFile) : Matrix::LoadDefaultRules();
+    for (int i = 0; i < 8; i++)
+    {
+      for (int j = 0; j < 3; j++)
+      {
+        std::cout << this->matrix[i * 3 + j] << " ";
+      }
+      std::cout << std::endl;
+    }
   }
-  else
+  catch (std::runtime_error e)
   {
-    LoadDefaultRules();
+    throw std::runtime_error(std::string("failed to load rules: ") + e.what());
   }
 }
-
-void PrisonersDilemmaApp::LoadDefaultRules() {}
-
-void PrisonersDilemmaApp::LoadRulesFromFile() {}

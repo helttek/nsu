@@ -1,8 +1,8 @@
 class Strategy
 {
 public:
-    Strategy();
-    ~Strategy(); 
+    Strategy() = default;
+    ~Strategy() = default;
 
 private:
     /* data */

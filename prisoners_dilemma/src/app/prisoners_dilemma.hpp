@@ -22,6 +22,7 @@ private:
   int steps;
   std::filesystem::path configsDirectory;
   std::filesystem::path matrixFile;
+  std::vector<int> matrix;
 
   // options limits
   std::set<std::string> availableModes;
@@ -43,9 +44,6 @@ private:
   void LoadRules();
 
   void LoadStrategisFromConfigsDirectory();
-
-  void LoadRulesFromFile();
-  void LoadDefaultRules();
 
   void LoadStrategies();
   void PrepareGameMode();
