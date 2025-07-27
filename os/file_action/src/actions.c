@@ -59,7 +59,7 @@ int ls_dir(const char *dir_name)
     }
     struct dirent *d;
     errno = 0;
-    while ((d = readdir(dir)) == NULL)
+    while ((d = readdir(dir)) != NULL)
     {
         switch (d->d_type)
         {
@@ -84,7 +84,7 @@ int ls_dir(const char *dir_name)
         }
         printf(" %s\n", d->d_name);
     }
-    if (!errno)
+    if (errno)
     {
         perror(strerror(errno));
         return 0;
@@ -92,7 +92,15 @@ int ls_dir(const char *dir_name)
     return 1;
 }
 
-int rm_dir(const char *dir_name) {}
+int rm_dir(const char *dir_name)
+{
+    if (rmdir(dir_name))
+    {
+        perror(strerror(errno));
+        return 0;
+    }
+    return 1;
+}
 
 int touch_file(const char *file_name) {}
 

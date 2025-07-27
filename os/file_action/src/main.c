@@ -32,16 +32,16 @@ int main(int argc, char *argv[])
     printf("Directory listed successfully.\n");
     return EXIT_SUCCESS;
   }
-  // if (!argcmp(argv[0], "rm_dir"))
-  // {
-  //   if (!rm_dir(argv[1]))
-  //   {
-  //     printf("Error: failed to remove directory %s\n", argv[1]);
-  //     return EXIT_FAILURE;
-  //   }
-  //   printf("Directory removed successfully.\n");
-  //   return EXIT_SUCCESS;
-  // }
+  if (!argcmp(argv[0], "rm_dir"))
+  {
+    if (!rm_dir(argv[1]))
+    {
+      printf("Error: failed to remove directory %s\n", argv[1]);
+      return EXIT_FAILURE;
+    }
+    printf("Directory removed successfully.\n");
+    return EXIT_SUCCESS;
+  }
 
   // if (!argcmp(argv[0], "touch_file"))
   // {

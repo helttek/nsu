@@ -9,8 +9,6 @@ int argcmp(const char *s1, const char *s2)
     {
         return 1;
     }
-    // printf("s1 size: %ld\n", strlen(s1));
-    // printf("s2 size: %ld\n", strlen(s2));
     int i = strlen(s1) - 1;
     int j = strlen(s2) - 1;
     for (; i >= 0 && j >= 0; --i, --j)
@@ -19,7 +17,7 @@ int argcmp(const char *s1, const char *s2)
         // printf("s2[%d]: %c\n", j, s2[j]);
         if (s1[i] != s2[j])
         {
-            printf("Warning: failed to identify operation %s with %s\n", s1, s2);
+            // printf("Warning: failed to identify operation %s with %s\n", s1, s2);
             return 1;
         }
     }
