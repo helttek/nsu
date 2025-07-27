@@ -1,0 +1,8 @@
+#!/bin/bash
+
+links=( "touch_dir" "ls_dir" "rm_dir" "touch_file" "cat_file" "rm_file" "touch_slink" "cat_slink" "cat_slink_file" "rm_slink" "touch_hlink" "ch_perm" "cat_perm" "rm_hlink" )
+
+cmake -B . -S .. && cmake --build . && 
+for link in "${links[@]}"; do
+    ln -f file_action "$link"
+done
