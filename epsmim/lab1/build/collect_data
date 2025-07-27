@@ -1,0 +1,49 @@
+#!/bin/zsh
+
+if [[ $# -eq 0 ]]; then
+    echo "usage: ./collect_data {optimization level} {path to profiles data directory}"
+    exit 1
+fi
+
+# Remove old profiling data
+rm -f ./lab1.gcda ./lab1.gcno ./lab1.cpp.gcov
+
+# Compile with profile generation
+g++ -O$1 -fprofile-generate -o ./lab1 ../lab1.cpp
+
+# Generate profile
+./lab1
+
+# Compile with profile use and profiling flags
+g++ -O$1 -g -pg --coverage -fprofile-use -o ./lab1 ../lab1.cpp
+
+echo "1"
+
+# Collect performance data
+perf record -g -e cycles -e cache-misses -- ./lab1
+echo "2"
+gprof -A lab1 > $2/lab1.source.txt
+echo "3"
+gprof lab1 > $2/lab1.profile.txt
+echo "4"
+gcov -b ./lab1 > $2/coverage
+echo "5"
+perf report > $2/perf_report
+echo "6"
+perf annotate > $2/perf_annotate
+
+# Collect cache and cycle statistics
+sudo perf top -e cycles -e cache-misses
+echo "7"
+perf stat ./lab1 > $2/perf_stat
+echo "8"
+perf stat -e LLC-loads -e LLC-load-misses ./lab1 > $2/perf_stat_adv
+
+#Collect branch misprediction statistics
+echo "9"
+perf stat -e branch-misses ./lab1 > $2/perf_branch_misses
+
+# Generate call graph
+echo "10"
+gprof ./lab1 | python3 ~/nsu/epsmim/gprof2dot.py -f prof -n0 -e0 | dot -Tpng -o $2/callgraph.png
+
