@@ -1,0 +1,73 @@
+import lingo/pegcode/driver;
+
+ArExpr ::= ArSum, ArMult, ArInt;
+		ArSum(lhs : ArExpr, rhs : ArExpr);
+		ArMult(lhs : ArExpr, rhs : ArExpr);
+		ArInt(val : int);
+
+RPN ::= Sum, Mult, Int;
+		Sum : ();
+		Mult : (); 
+		Int : (d : int);
+
+ParseString(str:string) -> ArExpr{
+	compiled_grammar=compilePegGrammar("#include ../reverse_polish_notation/main.lingo");
+	parsic(compiled_grammar, str, defaultPegActions);
+}
+
+GetRPNStack(arExpr: ArExpr) -> [RPN] {
+    switch (arExpr) {
+    	ArMult(lhs, rhs) : concat(concat(GetRPNStack(lhs), GetRPNStack(rhs)), [Mult()]);
+    	ArSum(lhs, rhs) : concat(concat(GetRPNStack(lhs), GetRPNStack(rhs)), [Sum()]);
+    	ArInt(d) : [Int(d)];
+  	}
+}
+
+RPN2Str(arExpr : [RPN]) -> string {
+    fold(arExpr, "", \acc, expr -> {
+        switch(expr) {
+            Sum() : acc + " +";
+            Mult() : acc + " *";
+            Int(a) : acc + " " + i2s(a);
+        }
+    });
+}
+
+CalcRPN(rpn : [RPN]) -> int {
+    stack = fold(rpn, makeList(), \acc0, a -> {
+        switch(a) {
+            Mult() :
+            {
+                lhs = headList(acc0, 0);
+                acc1 = tailList(acc0);
+                rhs = headList(acc1, 0);
+                acc2 = tailList(acc1);
+                Cons(lhs * rhs, acc2);
+            }
+            Sum() : 
+            {
+                lhs = headList(acc0, 0);
+                acc1 = tailList(acc0);
+                rhs = headList(acc1, 0);
+                acc2 = tailList(acc1);
+                Cons(lhs + rhs, acc2);
+            }
+            Int(d) : 
+            {
+                Cons(d, acc0);
+            }
+        }
+    });
+    headList(stack, 0);
+}
+
+// lab6 - грамматика та же самая; по дереву сделать обратную польскую запись и посчитать по этой записи выражение
+main() {
+	ar_expr_str = "(2 * (  (4* ( 2+  3))  + 2))";
+	println("initial string: " + ar_expr_str);
+	ar_expr = ParseString(ar_expr_str);
+	rpnStack=GetRPNStack(ar_expr);
+	println(RPN2Str(rpnStack));
+	println(i2s(CalcRPN(rpnStack)));
+	quit(0);
+}

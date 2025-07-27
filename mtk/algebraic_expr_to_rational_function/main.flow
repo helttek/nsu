@@ -1,0 +1,376 @@
+import util;
+
+MonomialVars(mult : Tree<string, int>);
+Polynomial(sum : Tree<MonomialVars, int>);
+RationalFunction(numerator: Polynomial, denominator : Polynomial);
+
+sumPolynomial(p1 : Polynomial, p2 : Polynomial) -> Polynomial {
+    Polynomial(filterTree(mergeTreeCustom(p1.sum, p2.sum, \k, v1, v2 -> {
+                v1 + v2;
+            }),
+            \k,v -> {!(v == 0)}
+        )
+    )
+}
+
+multPolynomial(p1 : Polynomial, p2 : Polynomial) -> Polynomial {
+    Polynomial(
+        filterTree(
+            foldTree(p1.sum, TreeEmpty(), \k1, v1, acc1 -> {
+                mergeTreeCustom(acc1,
+                    foldTree(p2.sum, TreeEmpty(), \k2, v2, acc2 ->
+                    {
+                        multi = MonomialVars(mergeTreeCustom(k1.mult, k2.mult, \kk, vv1, vv2 -> {//sum var degrees
+                            vv1 + vv2
+                        }));
+                        mergeTreeCustom(acc2, makeTree1(multi, v1 * v2), \kk, vv1, vv2 -> {//mult monome coeffs
+                            vv1 + vv2
+                        });
+                    }),
+                    \kk, vv1, vv2 -> {//sum resulting monomes
+                        vv1 + vv2
+                        }
+                )
+            })
+            , \k,v -> {
+                !(v == 0)
+            }
+        )
+    )
+}
+
+negPolynomial(p: Polynomial) -> Polynomial {
+    Polynomial(
+        foldTree(p.sum, TreeEmpty(), \k, v, acc -> {
+            mergeTree(acc, makeTree1(k, 0 - v));
+        })
+    )
+}
+
+sumRationalFunction(f1:RationalFunction, f2:RationalFunction) -> RationalFunction {
+    nom1 = multPolynomial(f1.numerator, f2.denominator);
+    nom2 = multPolynomial(f2.numerator, f1.denominator);
+    den = multPolynomial(f1.denominator, f2.denominator);
+    RationalFunction(sumPolynomial(nom1, nom2), den);
+}
+
+negRationalFunction(f1:RationalFunction) -> RationalFunction {
+    RationalFunction(negPolynomial(f1.numerator), f1.denominator);
+}
+
+multRationalFunction(f1:RationalFunction, f2:RationalFunction) -> RationalFunction {
+    RationalFunction(multPolynomial(f1.numerator, f2.numerator), multPolynomial(f1.denominator, f2.denominator));
+}
+
+divRationalFunction(f1: RationalFunction, f2:RationalFunction) -> RationalFunction {
+    multRationalFunction(f1, RationalFunction(f2.denominator, f2.numerator));
+}
+
+calculateRationalFunction(e: ArExpr) -> RationalFunction {
+    switch(e) {
+        ArSum(l,r): sumRationalFunction(calculateRationalFunction(l), calculateRationalFunction(r));
+        ArSub(l,r): sumRationalFunction(calculateRationalFunction(l), negRationalFunction(calculateRationalFunction(r)));
+        ArMult(l,r): multRationalFunction(calculateRationalFunction(l), calculateRationalFunction(r));
+        ArDiv(l,r): divRationalFunction(calculateRationalFunction(l), calculateRationalFunction(r));
+        ArNeg(l): negRationalFunction(calculateRationalFunction(l));
+        ArVar(v): RationalFunction(Polynomial(makeTree1(MonomialVars(makeTree1(v, 1)), 1)), Polynomial(makeTree1(MonomialVars(TreeEmpty()), 1)));
+        RationalNumber(n,d): RationalFunction(Polynomial(makeTree1(MonomialVars(TreeEmpty()), n)), Polynomial(makeTree1(MonomialVars(TreeEmpty()), d)));
+    }
+}
+
+SimplifyFunc(func: RationalFunction) -> RationalFunction {
+    if (RationalFunction2s(func) == "0") {
+        func;
+    }
+    else {
+	    numCom = findCommonMultiplierInSum(func.numerator);
+	    denCom = findCommonMultiplierInSum(func.denominator);
+	    numRest = dividePolynomial(func.numerator, numCom);
+	    denRest = dividePolynomial(func.denominator, denCom);
+	    comsCom = findCommonMultiplierInPolynomynomialPair(numCom, denCom);
+   	    numComRest = dividePolynomial(numCom, comsCom);
+	    denComRest = dividePolynomial(denCom, comsCom);
+	    if (numRest == denRest) {
+		    RationalFunction(numComRest, denComRest);
+	    }
+	    else if (numRest == negPolynomial(denRest)) {
+		    negRationalFunction(RationalFunction(numComRest, denComRest));
+	    }
+	    else {
+		    multRationalFunction(RationalFunction(numRest, denRest), RationalFunction(numComRest,denComRest))
+	    }
+    }
+}
+
+findCommonMultiplierInSum(p: Polynomial) -> Polynomial {
+	Polynomial(makeTree1(findCommonMultiplierInMonomialVarsiplication(p), findCommonMultiplierInNumerators(p)));
+}
+
+findCommonMultiplierInMonomialVarsiplication(p: Polynomial) -> MonomialVars {
+	if (p.sum == TreeEmpty()) {
+        MonomialVars(TreeEmpty());
+    }
+	else {
+		firstMonomialVars = (tree2pairs(p.sum))[0];
+		MonomialVarsTree = foldTree(firstMonomialVars.first.mult, firstMonomialVars.first.mult, \k, v, acc -> {
+			foldTree(p.sum, acc, \k1, v1, acc1 -> {
+				v2 = lookupTreeDef(k1.mult, k, 0);
+				mergeTreeCustom(acc1, makeTree1(k, if (v2 > v) v else v2), \k2, vv1, vv2 -> {
+					if (vv1 > vv2) 
+                        vv2
+					else 
+                        vv1
+				})
+			})
+		})
+		MonomialVars(filterTree(MonomialVarsTree, \k, v -> { 
+            !(v == 0)
+        }));
+	}
+}
+
+findCommonMultiplierInNumerators(p: Polynomial) -> int {
+	if (p.sum == TreeEmpty())
+        1
+	else {
+		foldTree(p.sum, 0, \k, v, acc -> {
+			if(acc == 0) 
+                iabs(v)
+			else 
+                gcd(acc, iabs(v))
+		})
+	}
+}
+
+findCommonMultiplierInPolynomynomialPair(p1 : Polynomial, p2 : Polynomial) -> Polynomial {
+	if(p1.sum == TreeEmpty() || p2.sum == TreeEmpty()) {
+        Polynomial(makeTree1(MonomialVars(TreeEmpty()), 1));
+    }
+	else {
+		psp1 = (tree2pairs(p1.sum))[0];
+		psp2 = (tree2pairs(p2.sum))[0];
+		
+		resultNum = gcd(psp1.second, psp2.second);
+
+		resultMult = foldTree(psp1.first.mult, psp1.first.mult, \k, v, acc -> {
+			v2 = lookupTreeDef(psp2.first.mult, k, 0);
+			mergeTreeCustom(acc, makeTree1(k, if(v2 > v) v else v2), \kk, vv1, vv2 -> {
+				if(vv1 > vv2) 
+                    vv2 
+                else 
+                    vv1
+			})
+		})
+		
+		Polynomial(makeTree1(MonomialVars(filterTree(resultMult, \k, v -> {
+            !(v == 0)
+        })), resultNum));
+	}
+}
+
+dividePolynomial(num : Polynomial, den : Polynomial) -> Polynomial {
+    if (Polynomial2s(den) == "1") {
+        num;
+    }
+    else {
+        psp = (tree2pairs(den.sum))[0];
+	    denNum = psp.second;
+	    denMult = psp.first.mult;
+
+	    Polynomial( foldTree(num.sum, TreeEmpty(), \k, v, acc -> {
+			    mergeTree(acc,
+				    makeTree1( MonomialVars(filterTree(
+						mergeTreeCustom(k.mult, denMult, \kk, vv1, vv2 -> {
+							vv2 - vv1;
+						    })
+						    , \k1, v1 -> {!(v1 == 0)})
+					    ),
+					    v/denNum
+				    )
+			    )
+		    }))
+    }
+}
+
+similarParts(p : Polynomial) -> Tree<string, int> {
+    plusValues = filterTree(p.sum, \key, value -> {
+        if (value > 0) {
+            true;
+        } 
+        else {
+            false;
+        }
+    });
+
+    textTreePlus = foldTree(plusValues, TreeEmpty(), \k,v,acc -> {
+        mergeTreeCustom(acc,
+            makeTree1( MonomialVars2s(k), v),
+            \kk, vv1,vv2 -> {
+                vv1 + vv2;
+            }
+        )
+    });
+
+    minusValues = filterTree(p.sum, \key, value -> {
+        if (value < 0) {
+            true;
+        } else {
+            false;
+        }
+    });
+
+    textTreeMinus = foldTree(minusValues, TreeEmpty(), \k,v,acc -> {
+        mergeTreeCustom(acc,
+            makeTree1(MonomialVars2s(k), v),
+            \kk,vv1,vv2 -> {
+                vv1 + vv2;
+            }
+        )
+    });
+
+    filterTree(mergeTreeCustom(textTreePlus, textTreeMinus, \k, v1, v2 -> {
+        v1 + v2;
+    }), \key, value -> {
+        value != 0
+    });
+
+}
+
+makeDegreeStr(var : string, degree : int) -> string {
+    if (degree != 1) {
+        var + "^" + i2s(degree);
+    }
+    else{
+        var;
+    }
+}
+
+MonomialVars2s(pm : MonomialVars) -> string{
+    pairsMonomialVars = tree2pairs(pm.mult);
+    if (length(pairsMonomialVars) == 0) {
+        "1";
+    }
+    else {
+        foldi(pairsMonomialVars, "", \i, acc, v -> {
+            MonomialVarsStr = acc + makeDegreeStr(v.first, v.second);
+            if (i == length(pairsMonomialVars) - 1) {
+                MonomialVarsStr;
+            }
+            else {
+                MonomialVarsStr + "*"
+            }
+        })
+    }
+}
+
+createReduceStr4Sum(coef : int, value : string) -> string{
+    if ((coef != 1) && (value != "1")) {
+        concatStrings([i2s(coef), "*", value]);
+    }
+    else if ((coef != 1) && (value == "1")) {
+        concatStrings([i2s(coef)]);
+    }
+    else if ((coef == 1) && (value != "1")) {
+        concatStrings([value]);
+    }
+    else {
+        concatStrings([i2s(coef)]);
+    }
+}
+
+Polynomial2s(ps : Polynomial) -> string{
+    pairsPolynomial = tree2pairs(ps.sum);
+
+    if (length(pairsPolynomial) == 0) {
+        "0";
+    }
+    else {
+        foldi(pairsPolynomial, "", \i, acc, v -> {
+        PolynomialStr = acc + createReduceStr4Sum(v.second, MonomialVars2s(v.first));
+        if (i == length(pairsPolynomial) - 1) {
+            PolynomialStr;
+        }
+        else {
+            PolynomialStr + " + "
+        }
+        });
+    }
+    
+}
+
+RationalFunction2s(func : RationalFunction) -> string {
+    if (Polynomial2s(func.denominator) == "1") {
+        Polynomial2s(func.numerator);
+    }
+    else {
+        "(" + Polynomial2s(func.numerator) + ") / (" + Polynomial2s(func.denominator) + ")";
+    }
+}
+
+simpleFunc2s (func : RationalFunction) -> string{
+    if (Polynomial2s(func.denominator) == "1") {
+        similar2s(similarParts(func.numerator));
+    }
+    else {
+        "(" + similar2s(similarParts(func.numerator)) + 
+            ") / (" + similar2s(similarParts(func.denominator)) + ")";
+    }
+}
+
+
+createReducePodobn(value : string, coef : int) -> string {
+    if ((coef != 1) && (coef != -1) && (value != "1")) {
+        concatStrings([i2s(coef), "*", value]);
+    }
+    else if ((coef != 1) && (coef != -1) && (value == "1") ){
+        concatStrings([i2s(coef)]);
+    }
+    else if ((coef == 1) && (value != "1")) {
+        concatStrings([value]);
+    }
+    else if ((coef == -1) && (value != "1")) {
+        concatStrings(["-", value]);
+    }
+    else {
+        concatStrings([i2s(coef)]);
+    }
+}
+
+similar2s(rfpod : Tree<string, int>) -> string{
+    pairs = tree2pairs(rfpod);
+
+    if (length(pairs) == 0) {
+        "0";
+    }
+    else {
+        foldi(pairs, "", \i, acc, v -> {
+        PolynomialStr = acc + createReducePodobn(v.first, v.second);
+        if (i == length(pairs) - 1) {
+            PolynomialStr;
+        }
+        else {
+            PolynomialStr + " + "
+        }
+        });
+    }
+}
+
+main() {
+    str = "(((4 * (a * a)) - 9) * ((1 / ((2 * a) - 3)) - (1 / ((2 * a) + 3))))";
+    println(str);
+    arExpr = Parse(str);
+    // println(arExpr);
+    simpleArExpr = simplify(arExpr);
+    // println(simpleArExpr);
+    rationalFuncion = calculateRationalFunction(simpleArExpr);
+    println(RationalFunction2s(rationalFuncion));
+    simpleFunc = SimplifyFunc(rationalFuncion);
+    // println(simpleFunc);
+    println("res:\n"+simpleFunc2s(simpleFunc));
+    quit(0);
+}
+
+/*
+Реализуйте функцию преобразования алгебраического выражения 
+в рациональную функцию (отношение двух многочленов).
+*/
