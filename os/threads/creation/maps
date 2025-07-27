@@ -1,0 +1,33 @@
+5908f65f7000-5908f65f8000 r--p 00000000 103:05 394451                    /home/helttek/nsu/operating_systems/threads/thread-example
+5908f65f8000-5908f65f9000 r-xp 00001000 103:05 394451                    /home/helttek/nsu/operating_systems/threads/thread-example
+5908f65f9000-5908f65fa000 r--p 00002000 103:05 394451                    /home/helttek/nsu/operating_systems/threads/thread-example
+5908f65fa000-5908f65fb000 r--p 00002000 103:05 394451                    /home/helttek/nsu/operating_systems/threads/thread-example
+5908f65fb000-5908f65fc000 rw-p 00003000 103:05 394451                    /home/helttek/nsu/operating_systems/threads/thread-example
+5908f7f3f000-5908f7f60000 rw-p 00000000 00:00 0                          [heap]
+7f72ace00000-7f72ace01000 ---p 00000000 00:00 0 
+7f72ace01000-7f72ad601000 rw-p 00000000 00:00 0 
+7f72ad800000-7f72ad801000 ---p 00000000 00:00 0 
+7f72ad801000-7f72ae001000 rw-p 00000000 00:00 0 
+7f72ae200000-7f72ae201000 ---p 00000000 00:00 0 
+7f72ae201000-7f72aea01000 rw-p 00000000 00:00 0 
+7f72aec00000-7f72aec01000 ---p 00000000 00:00 0 
+7f72aec01000-7f72af401000 rw-p 00000000 00:00 0 
+7f72af600000-7f72af601000 ---p 00000000 00:00 0 
+7f72af601000-7f72afe01000 rw-p 00000000 00:00 0 
+7f72b0000000-7f72b0028000 r--p 00000000 103:05 2239619                   /usr/lib/x86_64-linux-gnu/libc.so.6
+7f72b0028000-7f72b01b0000 r-xp 00028000 103:05 2239619                   /usr/lib/x86_64-linux-gnu/libc.so.6
+7f72b01b0000-7f72b01ff000 r--p 001b0000 103:05 2239619                   /usr/lib/x86_64-linux-gnu/libc.so.6
+7f72b01ff000-7f72b0203000 r--p 001fe000 103:05 2239619                   /usr/lib/x86_64-linux-gnu/libc.so.6
+7f72b0203000-7f72b0205000 rw-p 00202000 103:05 2239619                   /usr/lib/x86_64-linux-gnu/libc.so.6
+7f72b0205000-7f72b0212000 rw-p 00000000 00:00 0 
+7f72b0348000-7f72b034b000 rw-p 00000000 00:00 0 
+7f72b035c000-7f72b035e000 rw-p 00000000 00:00 0 
+7f72b035e000-7f72b035f000 r--p 00000000 103:05 2239437                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7f72b035f000-7f72b038a000 r-xp 00001000 103:05 2239437                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7f72b038a000-7f72b0394000 r--p 0002c000 103:05 2239437                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7f72b0394000-7f72b0396000 r--p 00036000 103:05 2239437                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7f72b0396000-7f72b0398000 rw-p 00038000 103:05 2239437                   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+7fffa8e3f000-7fffa8e60000 rw-p 00000000 00:00 0                          [stack]
+7fffa8e6f000-7fffa8e73000 r--p 00000000 00:00 0                          [vvar]
+7fffa8e73000-7fffa8e75000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]

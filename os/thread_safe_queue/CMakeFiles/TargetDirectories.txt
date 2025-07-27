@@ -1,0 +1,10 @@
+/home/helttek/CLionProjects/queue/CMakeFiles/spinlock0.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/spinlock1.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/mutex0.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/mutex1.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/cond_var0.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/cond_var1.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/semaphore0.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/semaphore1.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/edit_cache.dir
+/home/helttek/CLionProjects/queue/CMakeFiles/rebuild_cache.dir

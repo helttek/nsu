@@ -1,0 +1,123 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.30"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "queue",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "cond_var0::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-cond_var0-Debug-920b37028f29dc3ea07a.json",
+					"name" : "cond_var0",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "cond_var1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-cond_var1-Debug-19d0ea5ada6ec3a6700a.json",
+					"name" : "cond_var1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mutex0::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mutex0-Debug-ed069b441b9d80890d87.json",
+					"name" : "mutex0",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mutex1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mutex1-Debug-143ac9b0c045a31b63fe.json",
+					"name" : "mutex1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "semaphore0::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-semaphore0-Debug-4b18ac4a87d8e004025e.json",
+					"name" : "semaphore0",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "semaphore1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-semaphore1-Debug-a90d82087f568681444b.json",
+					"name" : "semaphore1",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "spinlock0::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-spinlock0-Debug-aa1f514043c239a3ce05.json",
+					"name" : "spinlock0",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "spinlock1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-spinlock1-Debug-efc18247260997e0339d.json",
+					"name" : "spinlock1",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/helttek/CLionProjects/queue/cmake-build-debug",
+		"source" : "/home/helttek/CLionProjects/queue"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

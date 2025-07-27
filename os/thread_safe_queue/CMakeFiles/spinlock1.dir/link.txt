@@ -1,0 +1,1 @@
+/usr/bin/cc "CMakeFiles/spinlock1.dir/src/queue-threads.c.o" CMakeFiles/spinlock1.dir/src/queue_spinlock.c.o -o spinlock1

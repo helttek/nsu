@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+
+gcc -fPIC -c d_lib.c
+gcc -o libd_lib.so -shared d_lib.o
+
+gcc -fPIC -c dl.c
+gcc -o libdl.so -shared dl.o
+
+gcc hello.c s_lib.c -L. -ld_lib
+
+./a.out
