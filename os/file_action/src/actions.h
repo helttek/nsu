@@ -8,7 +8,7 @@ int touch_file(const char *file_name);
 int cat_file(const char *file_name);
 int rm_file(const char *file_name);
 
-int touch_slink(const char *slink_name);
+int touch_slink(const char *slink_file_name);
 int cat_slink(const char *slink_name);
 int cat_slink_file(const char *slink_name);
 int rm_slink(const char *slink_name);

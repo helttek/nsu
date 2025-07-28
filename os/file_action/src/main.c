@@ -43,47 +43,47 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
   }
 
-  // if (!argcmp(argv[0], "touch_file"))
-  // {
-  //   if (!touch_file(argv[1]))
-  //   {
-  //     printf("Error: failed to create file %s\n", argv[1]);
-  //     return EXIT_FAILURE;
-  //   }
-  //   printf("File created successfully.\n");
-  //   return EXIT_SUCCESS;
-  // }
-  // if (!argcmp(argv[0], "cat_file"))
-  // {
-  //   if (!cat_file(argv[1]))
-  //   {
-  //     printf("Error: failed to list contents of file %s\n", argv[1]);
-  //     return EXIT_FAILURE;
-  //   }
-  //   printf("File contents printed successfully.\n");
-  //   return EXIT_SUCCESS;
-  // }
-  // if (!argcmp(argv[0], "rm_file"))
-  // {
-  //   if (!rm_file(argv[1]))
-  //   {
-  //     printf("Error: failed to remove file %s\n", argv[1]);
-  //     return EXIT_FAILURE;
-  //   }
-  //   printf("File removed successfully.\n");
-  //   return EXIT_SUCCESS;
-  // }
+  if (!argcmp(argv[0], "touch_file"))
+  {
+    if (!touch_file(argv[1]))
+    {
+      printf("Error: failed to create file %s\n", argv[1]);
+      return EXIT_FAILURE;
+    }
+    printf("File created successfully.\n");
+    return EXIT_SUCCESS;
+  }
+  if (!argcmp(argv[0], "cat_file"))
+  {
+    if (!cat_file(argv[1]))
+    {
+      printf("Error: failed to list contents of file %s\n", argv[1]);
+      return EXIT_FAILURE;
+    }
+    printf("File contents printed successfully.\n");
+    return EXIT_SUCCESS;
+  }
+  if (!argcmp(argv[0], "rm_file"))
+  {
+    if (!rm_file(argv[1]))
+    {
+      printf("Error: failed to remove file %s\n", argv[1]);
+      return EXIT_FAILURE;
+    }
+    printf("File removed successfully.\n");
+    return EXIT_SUCCESS;
+  }
 
-  // if (!argcmp(argv[0], "touch_slink"))
-  // {
-  //   if (!touch_slink(argv[1]))
-  //   {
-  //     printf("Error: failed to create symlink %s\n", argv[1]);
-  //     return EXIT_FAILURE;
-  //   }
-  //   printf("Symlink created successfully.\n");
-  //   return EXIT_SUCCESS;
-  // }
+  if (!argcmp(argv[0], "touch_slink"))
+  {
+    if (!touch_slink(argv[1]))
+    {
+      printf("Error: failed to create symlink %s\n", argv[1]);
+      return EXIT_FAILURE;
+    }
+    printf("Symlink created successfully.\n");
+    return EXIT_SUCCESS;
+  }
   // if (!argcmp(argv[0], "cat_slink"))
   // {
   //   if (!cat_slink(argv[1]))
