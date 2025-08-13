@@ -1,5 +1,9 @@
-# Some source materials for "Databases" subject at NSU
-## Dependencies and Build
+# Some source materials for "Databases"
+## Computer store database (1 semester)
+Database was first created in the libre office database client, then moved to postgresql.
+## University library database app project (2 semester)
+The database used is postgresql, the app itself is written in python.
+### Dependencies and Build
 Dependencies:
 ```bash
 apt install python3 python3-pip

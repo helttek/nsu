@@ -1,3 +1,2 @@
-# Epsmim
-## Labs for the "Efficient programming of modern microprocessors and multiprocessors" subject at NSU
-- each directory contains description of a task
+# Labs for the "Efficient programming of modern microprocessors and multiprocessors" subject
+Each directory contains description of a task.
