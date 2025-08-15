@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/semaphore1.dir/src/queue_semaphore.c.o "CMakeFiles/semaphore1.dir/src/queue-threads.c.o" -o semaphore1

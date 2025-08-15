@@ -1,1 +1,0 @@
-/usr/bin/cc "CMakeFiles/mutex1.dir/src/queue-threads.c.o" CMakeFiles/mutex1.dir/src/queue_mutex.c.o -o mutex1

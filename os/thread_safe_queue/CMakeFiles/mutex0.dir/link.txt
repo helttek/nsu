@@ -1,1 +1,0 @@
-/usr/bin/cc "CMakeFiles/mutex0.dir/src/queue-example.c.o" CMakeFiles/mutex0.dir/src/queue_mutex.c.o -o mutex0

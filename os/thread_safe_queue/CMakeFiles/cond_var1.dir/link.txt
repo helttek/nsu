@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/cond_var1.dir/src/queue_cond_var.c.o "CMakeFiles/cond_var1.dir/src/queue-threads.c.o" -o cond_var1
