@@ -1,18 +1,17 @@
 ﻿namespace coordinator;
 
-using strategy;
-
-public class Coordinator : IObservable<Fork>
+public class Coordinator
 {
-    private Philosopher[] observers;
-
-    public Coordinator(int philosophersNum)
+    public Coordinator(Philosopher[] philosophers)
     {
-        this.observers = new Philosopher[philosophersNum];
+        for (int i = 0; i < philosophers.Length; i++)
+        {
+            philosophers[i].IsHungry += HandleHungryPhilosopher;
+        }
     }
 
-    public IDisposable Subscribe(IObserver<Fork> observer)
+    private void HandleHungryPhilosopher(Philosopher philosopher)
     {
-        
+        philosopher.TakeLeftFork();
     }
 }

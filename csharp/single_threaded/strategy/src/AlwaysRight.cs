@@ -1,9 +1,15 @@
-using strategy;
+namespace strategy;
 
-class AlwaysRight(Fork right, Fork left) : Strategy
+public class AlwaysRight : Strategy
 {
-    private Fork right = right;
-    private Fork left = left;
+    private Fork right;
+    private Fork left;
+
+    public AlwaysRight()
+    {
+        this.left = new();
+        this.right = new();
+    }
 
     public override void MakeMove()
     {
