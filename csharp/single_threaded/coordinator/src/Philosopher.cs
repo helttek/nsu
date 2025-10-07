@@ -4,7 +4,7 @@ using strategy;
 
 public class Philosopher
 {
-    private enum State : byte
+    public enum State : byte
     {
         Thinking,
         Hungry,
@@ -20,8 +20,9 @@ public class Philosopher
     private uint stepsToEat;
     private uint stepsToThink;
     private uint stepsToTakeFork;
+    private uint eaten;
 
-    private string name { get; }
+    private string name;
 
     private State state;
 
@@ -37,6 +38,7 @@ public class Philosopher
         this.stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
         this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
+        this.eaten = 0;
     }
 
     public Philosopher(string name)
@@ -49,23 +51,18 @@ public class Philosopher
         this.stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
         this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
+        this.eaten = 0;
     }
 
     public void MakeMove()
     {
-        if (strategy != null)
-        {
-            strategy.MakeMove();
-        }
         step++;
         switch (state)
         {
             case State.Thinking:
                 if (step >= stepsToThink)
                 {
-                    step = 1;
-                    stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
-                    state = State.Hungry;
+                    FinishedThinking();
                     return;
                 }
                 break;
@@ -73,10 +70,7 @@ public class Philosopher
             case State.Eating:
                 if (step >= stepsToEat)
                 {
-                    step = 1;
-                    stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
-                    ReleaseForks();
-                    state = State.Thinking;
+                    FinishedEating();
                     return;
                 }
                 break;
@@ -84,14 +78,17 @@ public class Philosopher
             case State.TakingFork:
                 if (step >= stepsToTakeFork)
                 {
-                    step = 1;
-                    ReleaseForks();
-                    state = State.Thinking;
+                    FinishedTakingFork();
                     return;
                 }
                 break;
 
+            case State.Hungry:
+                FinishedHungry();
+                break;
+
             default:
+                Console.WriteLine(name + ": unknown state");
                 break;
         }
     }
@@ -102,5 +99,62 @@ public class Philosopher
 
     public void TakeRightFork() { }
 
+    private void FinishedThinking()
+    {
+        step = 0;
+        stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
+        state = State.Hungry;
+    }
+
+    private void FinishedHungry()
+    {
+        if (strategy != null)
+        {
+            strategy.MakeMove();
+            return;
+        }
+
+
+
+
+
+    }
+
+    private void FinishedEating()
+    {
+        eaten++;
+        step = 0;
+        stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
+        ReleaseForks();
+        state = State.Thinking;
+    }
+
+    private void FinishedTakingFork()
+    {
+        step = 0;
+        ReleaseForks();
+        state = State.Thinking;
+    }
+
     public event Action<Philosopher>? IsHungry;
+
+    public State GetState()
+    {
+        return state;
+    }
+
+    public string GetName()
+    {
+        return name;
+    }
+
+    public uint GetEaten()
+    {
+        return eaten;
+    }
+
+    public string GetCurrentAction()
+    {
+        return "some action/steps left";
+    }
 }

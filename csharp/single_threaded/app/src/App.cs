@@ -7,72 +7,98 @@ class Program
 {
     static void Main()
     {
-        string settingsFileName = "appsettings.json";
-        string settingsFileString = File.ReadAllText(settingsFileName);
-        Settings? settings = JsonSerializer.Deserialize<Settings>(settingsFileString);
-        if (settings == null)
-        {
-            Console.WriteLine("settings are null");
-            return;
-        }
-        if (settings.Philosophers == null)
-        {
-            Console.WriteLine("Philosophers names in settings are null");
-            return;
-        }
+        Settings? settings = JsonSerializer.Deserialize<Settings>(File.ReadAllText("appsettings.json"));
+        ValidateSettings(settings);
 
         Philosopher[] philosophers = new Philosopher[settings.Philosophers.Length];
-        Coordinator coordinator;
+        Fork[] forks = new Fork[settings.Philosophers.Length];
         if (settings.UseCoordinator == true)
         {
             for (int i = 0; i < philosophers.Length; i++)
             {
+                if (i == philosophers.Length - 1)
+                {
+                    philosophers[i] = new Philosopher(settings.Philosophers[i]);
+                }
                 philosophers[i] = new Philosopher(settings.Philosophers[i]);
             }
-            coordinator = new(philosophers);
-            Run(philosophers, coordinator);
-            return;
-        }
-        Strategy defaultStrategy = new AlwaysRight();
-        Strategy strategy;
-        if (settings.Strategy != null)
-        {
-            switch (settings.Strategy)
-            {
-                case "AlwaysRight":
-                    strategy = new AlwaysRight();
-                    break;
-
-                default:
-                    Console.WriteLine("No known strategy was provided, using default one.");
-                    strategy = defaultStrategy;
-                    break;
-            }
+            Run(philosophers, new Coordinator(philosophers));
         }
         else
         {
-            strategy = defaultStrategy;
+            Strategy strategy = GetStrategy(settings.Strategy);
+            for (int i = 0; i < philosophers.Length; i++)
+            {
+                philosophers[i] = new Philosopher(settings.Philosophers[i], strategy);
+            }
+            Run(philosophers);
         }
-        for (int i = 0; i < philosophers.Length; i++)
+    }
+
+    private static void ValidateSettings(Settings? settings)
+    {
+        if (settings == null)
         {
-            philosophers[i] = new Philosopher(settings.Philosophers[i], strategy);
+            throw new Exception("settings are null");
         }
-        Run(philosophers);
+        if (settings.Philosophers == null)
+        {
+            throw new Exception("Philosophers names in settings are null");
+        }
+    }
+
+    private static Strategy GetStrategy(string? strategy)
+    {
+        if (strategy != null)
+        {
+            switch (strategy)
+            {
+                case "AlwaysRight":
+                    return new AlwaysRight();
+
+                default:
+                    Console.WriteLine("No known strategy was provided, using default one.");
+                    return new AlwaysRight();
+            }
+        }
+        return new AlwaysRight();
     }
 
     private static void Run(Philosopher[] philosophers)
     {
         uint step = 0;
-        const uint MAX_NUM_STEPS = 1000000;
+        const uint MAX_NUM_STEPS = 100;
         while (step != MAX_NUM_STEPS)
         {
             for (int i = 0; i < philosophers.Length; i++)
             {
-                
+                philosophers[i].MakeMove();
             }
+            PrintState(philosophers, step);
             step++;
         }
     }
+
+    private static void PrintState(Philosopher[] philosophers, uint currentStep)
+    {
+        Console.WriteLine("=================== STEP " + Convert.ToString(currentStep + 1) + " ===================");
+        Console.WriteLine("Philosophers:");
+        for (int i = 0; i < philosophers.Length; i++)
+        {
+            Console.Write("  " + philosophers[i].GetName() + ": ");
+            Console.Write(philosophers[i].GetState());
+            Console.Write(" (" + philosophers[i].GetCurrentAction() + "); ");
+            Console.WriteLine("eaten: " + Convert.ToString(philosophers[i].GetEaten()));
+        }
+        Console.WriteLine();
+        Console.WriteLine("Forks:");
+
+    }
+
+    //TODO: 
+    // - where should the forks be? in the Philosopher class?
+    // - keep track of forks (create them as an array and pass them as an argument to a Philosoper constructor)
+    // - add forks to a constructor in Philosopher class
 
     private static void Run(Philosopher[] philosophers, Coordinator coordinator) { }
 }
