@@ -21,14 +21,13 @@ public class Philosopher
     private uint stepsToThink;
     private uint stepsToTakeFork;
     private uint eaten;
-
     private string name;
-
     private State state;
-
     private Strategy? strategy;
+    private readonly Fork right;
+    private readonly Fork left;
 
-    public Philosopher(string name, Strategy strategy)
+    public Philosopher(string name, ref Fork left, ref Fork right, Strategy strategy)
     {
         this.state = State.Hungry;
         this.name = name;
@@ -39,9 +38,11 @@ public class Philosopher
         this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
         this.eaten = 0;
+        this.left = left;
+        this.right = right;
     }
 
-    public Philosopher(string name)
+    public Philosopher(string name, ref Fork left, ref Fork right)
     {
         this.state = State.Hungry;
         this.name = name;
@@ -52,6 +53,8 @@ public class Philosopher
         this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
         this.eaten = 0;
+        this.left = left;
+        this.right = right;
     }
 
     public void MakeMove()
@@ -59,10 +62,14 @@ public class Philosopher
         step++;
         switch (state)
         {
-            case State.Thinking:
-                if (step >= stepsToThink)
+            case State.Hungry:
+                FinishedHungry();
+                break;
+
+            case State.TakingFork:
+                if (step >= stepsToTakeFork)
                 {
-                    FinishedThinking();
+                    FinishedTakingFork();
                     return;
                 }
                 break;
@@ -75,27 +82,29 @@ public class Philosopher
                 }
                 break;
 
-            case State.TakingFork:
-                if (step >= stepsToTakeFork)
+            case State.Thinking:
+                if (step >= stepsToThink)
                 {
-                    FinishedTakingFork();
+                    FinishedThinking();
                     return;
                 }
                 break;
 
-            case State.Hungry:
-                FinishedHungry();
-                break;
-
             default:
-                Console.WriteLine(name + ": unknown state");
-                break;
+                throw new Exception("Error: " + name + " has unknown state");
         }
     }
 
-    private void ReleaseForks() { }
+    private void ReleaseForks()
+    {
+        left.Release();
+        right.Release();
+    }
 
-    public void TakeLeftFork() { }
+    public void TakeLeftFork()
+    {
+
+    }
 
     public void TakeRightFork() { }
 
@@ -108,16 +117,71 @@ public class Philosopher
 
     private void FinishedHungry()
     {
-        if (strategy != null)
+        if (left == null)
         {
-            strategy.MakeMove();
-            return;
+            throw new Exception("ERROR " + name + ": left fork is null (wtf)");
         }
-
-
-
-
-
+        if (right == null)
+        {
+            throw new Exception("ERROR " + name + ": right fork is null (wtf)");
+        }
+        string? firstMove = strategy?.NextMove();
+        if (firstMove == null) { throw new Exception(name + ": Strategy is null"); }
+        if (firstMove == "left")
+        {
+            try
+            {
+                left.Take(name);
+                try
+                {
+                    right.Take(name);
+                }
+                catch (System.Exception e)
+                {
+                    state = State.Hungry;
+                    step = 0;
+                    left.Release();
+                    Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
+                    return;
+                }
+            }
+            catch (System.Exception e)
+            {
+                state = State.Hungry;
+                step = 0;
+                Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
+                return;
+            }
+        }
+        else
+        {
+            try
+            {
+                right.Take(name);
+                try
+                {
+                    left.Take(name);
+                }
+                catch (System.Exception e)
+                {
+                    state = State.Hungry;
+                    step = 0;
+                    right.Release();
+                    Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
+                    return;
+                }
+            }
+            catch (System.Exception e)
+            {
+                state = State.Hungry;
+                step = 0;
+                Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
+                return;
+            }
+        }
+        step = 0;
+        state = State.TakingFork;
+        return;
     }
 
     private void FinishedEating()
@@ -132,8 +196,7 @@ public class Philosopher
     private void FinishedTakingFork()
     {
         step = 0;
-        ReleaseForks();
-        state = State.Thinking;
+        state = State.Eating;
     }
 
     public event Action<Philosopher>? IsHungry;

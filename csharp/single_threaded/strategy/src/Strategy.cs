@@ -4,5 +4,5 @@ public abstract class Strategy
 {
     public Strategy() { }
 
-    public abstract void MakeMove();
+    public abstract string NextMove();
 }
