@@ -1,5 +1,6 @@
 namespace coordinator;
 
+using System.Net;
 using strategy;
 
 public class Philosopher
@@ -26,6 +27,9 @@ public class Philosopher
     private Strategy? strategy;
     private readonly Fork right;
     private readonly Fork left;
+    private Coordinator coordinator;
+    private bool leftTaken;
+    private bool rightTaken;
 
     public Philosopher(string name, ref Fork left, ref Fork right, Strategy strategy)
     {
@@ -42,7 +46,7 @@ public class Philosopher
         this.right = right;
     }
 
-    public Philosopher(string name, ref Fork left, ref Fork right)
+    public Philosopher(string name, ref Fork left, ref Fork right, Coordinator coordinator)
     {
         this.state = State.Hungry;
         this.name = name;
@@ -55,6 +59,142 @@ public class Philosopher
         this.eaten = 0;
         this.left = left;
         this.right = right;
+        this.coordinator = coordinator;
+        this.coordinator.Action += Do;
+        this.rightTaken = false;
+        this.leftTaken = false;
+    }
+
+    private void Do(Philosopher philosopher, string action)
+    {
+        if (philosopher != this)
+        {
+            return;
+        }
+
+        if (action == "Take left") // is it true that only one event will be raised per one step of simulation? if yes then step should be incremented without and if (otherwise no clue how to count steps internally)
+        {
+            step++;
+        }
+        switch (state)
+        {
+            case State.Hungry:
+                FinishedHungry(action);
+                break;
+
+            case State.TakingFork:
+                if (step >= stepsToTakeFork)
+                {
+                    FinishedTakingFork();
+                    return;
+                }
+                break;
+
+            case State.Eating:
+                if (step >= stepsToEat)
+                {
+                    FinishedEating(action);
+                    return;
+                }
+                break;
+
+            case State.Thinking:
+                if (step >= stepsToThink)
+                {
+                    FinishedThinking();
+                    return;
+                }
+                break;
+
+            default:
+                throw new Exception("Error: " + name + " has unknown state");
+        }
+    }
+
+    private void FinishedHungry(string action)
+    {
+        switch (action)
+        {
+            case "Take left":
+                TryTakeLeft();
+                break;
+
+            case "Take right":
+                TryTakeRight();
+                break;
+
+            default:
+                // Console.Error.WriteLine("ERROR: unknown action \"" + action + "\" from coordinator to " + name);
+                break;
+        }
+        if (leftTaken && rightTaken)
+        {
+            step = 0;
+            state = State.TakingFork;
+        }
+        else
+        {
+            step = 0;
+            state = State.Hungry;
+            // ReleaseForks();
+        }
+    }
+
+    private void FinishedEating(string action)
+    {
+        // switch (action)
+        // {
+        //     case "Release left":
+        //         left.Release();
+        //         break;
+
+        //     case "Release right":
+        //         right.Release();
+        //         break;
+
+        //     default:
+        //         // Console.Error.WriteLine("ERROR: unknown action \"" + action + "\" from coordinator to " + name);
+        //         break;
+        // }
+        ReleaseForks();
+        if (!leftTaken && !rightTaken)
+        {
+            eaten++;
+            step = 0;
+            stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
+            state = State.Thinking;
+        }
+        else
+        {
+            step = 0;
+            // ReleaseForks();
+        }
+    }
+
+    private void TryTakeLeft()
+    {
+        try
+        {
+            left.Take(name);
+            leftTaken = true;
+        }
+        catch (System.Exception e)
+        {
+            // Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
+        }
+    }
+
+    private void TryTakeRight()
+    {
+        try
+        {
+            right.Take(name);
+            rightTaken = true;
+        }
+        catch (System.Exception e)
+        {
+            // Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
+        }
     }
 
     public void MakeMove()
@@ -101,13 +241,6 @@ public class Philosopher
         right.Release();
     }
 
-    public void TakeLeftFork()
-    {
-
-    }
-
-    public void TakeRightFork() { }
-
     private void FinishedThinking()
     {
         step = 0;
@@ -141,7 +274,7 @@ public class Philosopher
                     state = State.Hungry;
                     step = 0;
                     left.Release();
-                    Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
+                    // Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
                     return;
                 }
             }
@@ -149,7 +282,7 @@ public class Philosopher
             {
                 state = State.Hungry;
                 step = 0;
-                Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
+                // Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
                 return;
             }
         }
@@ -181,7 +314,6 @@ public class Philosopher
         }
         step = 0;
         state = State.TakingFork;
-        return;
     }
 
     private void FinishedEating()
@@ -199,7 +331,7 @@ public class Philosopher
         state = State.Eating;
     }
 
-    public event Action<Philosopher>? IsHungry;
+
 
     public State GetState()
     {
@@ -218,6 +350,22 @@ public class Philosopher
 
     public string GetCurrentAction()
     {
-        return "some action/steps left";
+        switch (state)
+        {
+            case State.Hungry:
+                return "Available actions: TakeRightFork | TakeLeftFork";
+
+            case State.TakingFork:
+                return Convert.ToString(stepsToTakeFork - step) + " steps left";
+
+            case State.Eating:
+                return Convert.ToString(stepsToEat - step) + " steps left";
+
+            case State.Thinking:
+                return Convert.ToString(stepsToThink - step) + " steps left";
+
+            default:
+                return "";
+        }
     }
 }

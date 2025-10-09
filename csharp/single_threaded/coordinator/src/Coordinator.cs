@@ -1,17 +1,37 @@
-﻿namespace coordinator;
+﻿using strategy;
+
+namespace coordinator;
 
 public class Coordinator
 {
-    public Coordinator(Philosopher[] philosophers)
+    public event Action<Philosopher, string>? Action;
+    private Philosopher[] philosophers;
+    private Fork[] forks;
+    private Random random;
+
+    public Coordinator(Philosopher[] philosophers, Fork[] forks)
     {
-        for (int i = 0; i < philosophers.Length; i++)
-        {
-            philosophers[i].IsHungry += HandleHungryPhilosopher;
-        }
+        this.philosophers = philosophers;
+        this.forks = forks;
+        this.random = new();
     }
 
-    private void HandleHungryPhilosopher(Philosopher philosopher)
+    public void SimulateStep()
     {
-        philosopher.TakeLeftFork();
+        // for (int i = 0; i < philosophers.Length; i++)
+        // {
+        //     Action?.Invoke(philosophers[i], "Take right");
+        //     Action?.Invoke(philosophers[i], "Take left");
+        //     Action?.Invoke(philosophers[i], "Release left");
+        //     Action?.Invoke(philosophers[i], "Release right");
+        // }
+        for (int i = 0; i < forks.Length; i++)
+        {
+            if (forks[i].IsAvailable() && forks[(i + 1) % forks.Length].IsAvailable())
+            {
+                Action?.Invoke(philosophers[i], "Take right");
+                Action?.Invoke(philosophers[i], "Take left");
+            }
+        }
     }
 }

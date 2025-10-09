@@ -2,7 +2,7 @@ namespace strategy;
 
 public class Fork
 {
-    private enum State : byte
+    public enum State : byte
     {
         Available,
         InUse
@@ -44,5 +44,10 @@ public class Fork
     {
         state = State.Available;
         usedBy = null;
+    }
+
+    public bool IsAvailable()
+    {
+        return state == State.Available;
     }
 }

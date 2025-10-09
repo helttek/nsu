@@ -8,56 +8,48 @@ class Program
     private const uint DEFAULT_MAX_NUM_STEPS = 100;
     static void Main()
     {
-        Settings? settings;
-        try
-        {
-            var settingsString = File.ReadAllText("appsettings.json");
-            try
-            {
-                settings = JsonSerializer.Deserialize<Settings>(settingsString);
-            }
-            catch (System.Exception e)
-            {
-                Console.WriteLine("Failed to load settings: " + e.Message);
-                return;
-            }
-
-        }
-        catch (System.Exception e)
-        {
-            Console.WriteLine("Failed to read file as text: " + e.Message);
-            return;
-        }
+        Settings? settings = GetSettings("appsettings.json");
         ValidateSettings(ref settings);
 
         Philosopher[] philosophers = new Philosopher[settings.Philosophers.Length];
         Fork[] forks = CreateForks(settings.Philosophers.Length);
         if (settings.UseCoordinator == true)
         {
+            Coordinator coordinator = new(philosophers, forks);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                if (i == philosophers.Length - 1)
-                {
-                    philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[0]);
-                    continue;
-                }
-                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[i + 1]);
+                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], coordinator);
             }
-            Run(philosophers, new Coordinator(philosophers), forks, settings.MaxNumberOfSteps);
+            Run(ref philosophers, ref coordinator, forks, settings.MaxNumberOfSteps);
         }
         else
         {
             Strategy strategy = GetStrategy(settings.Strategy);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                if (i == philosophers.Length - 1)
-                {
-                    philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[0], strategy);
-                    continue;
-                }
-                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[i + 1], strategy);
+                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], strategy);
             }
             Run(philosophers, forks, settings.MaxNumberOfSteps);
+        }
+    }
+
+    private static Settings GetSettings(string fileName)
+    {
+        try
+        {
+            var settingsString = File.ReadAllText(fileName);
+            try
+            {
+                return JsonSerializer.Deserialize<Settings>(settingsString);
+            }
+            catch (System.Exception e)
+            {
+                throw new Exception("Failed to load settings: " + e.Message);
+            }
+        }
+        catch (System.Exception e)
+        {
+            throw new Exception("Failed to read file as text: " + e.Message);
         }
     }
 
@@ -147,16 +139,13 @@ class Program
         Console.WriteLine();
     }
 
-    private static void Run(Philosopher[] philosophers, Coordinator coordinator, Fork[] forks, uint? MAX_NUM_STEPS)
+    private static void Run(ref Philosopher[] philosophers, ref Coordinator coordinator, Fork[] forks, uint? MAX_NUM_STEPS)
     {
         uint step = 0;
         while (step != MAX_NUM_STEPS)
         {
             PrintState(philosophers, step, forks);
-            for (int i = 0; i < philosophers.Length; i++)
-            {
-                philosophers[i].MakeMove();
-            }
+            coordinator.SimulateStep();
             step++;
         }
     }
