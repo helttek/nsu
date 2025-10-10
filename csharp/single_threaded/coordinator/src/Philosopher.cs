@@ -368,4 +368,9 @@ public class Philosopher
                 return "";
         }
     }
+
+    // public uint GetEaten()
+    // {
+    //     return eaten;
+    // }
 }

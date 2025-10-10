@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Metrics;
+using System.Text.Json;
 using coordinator;
 using strategy;
 namespace app;
@@ -6,6 +7,8 @@ namespace app;
 class Program
 {
     private const uint DEFAULT_MAX_NUM_STEPS = 100;
+    private const uint METRIC_FREQ = 1000;
+
     static void Main()
     {
         Settings? settings = GetSettings("appsettings.json");
@@ -99,6 +102,7 @@ class Program
 
     private static void Run(Philosopher[] philosophers, Fork[] forks, uint? MAX_NUM_STEPS)
     {
+        Metrics metrics = new(forks, philosophers);
         uint step = 0;
         while (step != MAX_NUM_STEPS)
         {
@@ -108,7 +112,12 @@ class Program
                 philosophers[i].MakeMove();
             }
             step++;
+            if (step == METRIC_FREQ - 1)
+            {
+                metrics.GetData();
+            }
         }
+        // metrics.Print();
     }
 
     private static void PrintState(Philosopher[] philosophers, uint currentStep, Fork[] forks)
@@ -141,6 +150,7 @@ class Program
 
     private static void Run(ref Philosopher[] philosophers, ref Coordinator coordinator, Fork[] forks, uint? MAX_NUM_STEPS)
     {
+        Metrics metrics = new(forks, philosophers);
         uint step = 0;
         while (step != MAX_NUM_STEPS)
         {
@@ -148,5 +158,16 @@ class Program
             coordinator.SimulateStep();
             step++;
         }
+        if (step == METRIC_FREQ - 1)
+        {
+            metrics.GetData();
+        }
     }
+
+    //TODO: 
+    // - find a class that uses the appsettings.json file natively
+    // - move the settings validation to the settings class
+    // - clean up enums and hardcoded values
+    // - the logic of choosing which and how forks to take should be in the strategy class
+    // - fix the coordinator events for better reusability
 }

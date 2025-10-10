@@ -18,13 +18,6 @@ public class Coordinator
 
     public void SimulateStep()
     {
-        // for (int i = 0; i < philosophers.Length; i++)
-        // {
-        //     Action?.Invoke(philosophers[i], "Take right");
-        //     Action?.Invoke(philosophers[i], "Take left");
-        //     Action?.Invoke(philosophers[i], "Release left");
-        //     Action?.Invoke(philosophers[i], "Release right");
-        // }
         for (int i = 0; i < forks.Length; i++)
         {
             if (forks[i].IsAvailable() && forks[(i + 1) % forks.Length].IsAvailable())
