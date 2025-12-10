@@ -146,9 +146,4 @@ class Program
         }
         metrics.Print();
     }
-
-    //TODO: 
-    // - clean up enums and hardcoded values
-    // - the logic of choosing which and how forks to take should be in the strategy class
-    // - fix the coordinator events for better reusability
 }
