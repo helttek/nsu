@@ -22,12 +22,13 @@ public class Philosopher
     private uint stepsToThink;
     private uint stepsToTakeFork;
     private uint eaten;
+    private uint totalHungrySteps;
     private string name;
     private State state;
     private Strategy? strategy;
     private readonly Fork right;
     private readonly Fork left;
-    private Coordinator coordinator;
+    private Coordinator? coordinator;
     private bool leftTaken;
     private bool rightTaken;
 
@@ -48,6 +49,9 @@ public class Philosopher
         this.eaten = 0;
         this.left = left;
         this.right = right;
+        this.leftTaken = false;
+        this.rightTaken = false;
+        this.totalHungrySteps = 0;
     }
 
     public Philosopher(string name, ref Fork left, ref Fork right, Coordinator coordinator, uint maxStepsToEat, uint minStepsToEat, uint maxStepsToThink, uint minStepsToThink)
@@ -71,8 +75,10 @@ public class Philosopher
         this.coordinator.Action += Do;
         this.rightTaken = false;
         this.leftTaken = false;
+        this.totalHungrySteps = 0;
     }
 
+    // Called by Coordinator via event in coordinator-driven simulation
     private void Do(Philosopher philosopher, string action)
     {
         if (philosopher != this)
@@ -80,10 +86,11 @@ public class Philosopher
             return;
         }
 
-        if (action == "Take left") // is it true that only one event will be raised per one step of simulation? if yes then step should be incremented without and if (otherwise no clue how to count steps internally)
+        if (action == "Tick")
         {
             step++;
         }
+
         switch (state)
         {
             case State.HUNGRY:
@@ -101,7 +108,7 @@ public class Philosopher
             case State.EATING:
                 if (step >= stepsToEat)
                 {
-                    FinishedEating(action);
+                    FinishedEating();
                     return;
                 }
                 break;
@@ -119,51 +126,36 @@ public class Philosopher
         }
     }
 
+    // Coordinator-driven: react to grants
     private void FinishedHungry(string action)
     {
         switch (action)
         {
-            case "Take left":
-                TryTakeLeft();
+            case "GrantLeft":
+                leftTaken = true;
                 break;
-
-            case "Take right":
-                TryTakeRight();
+            case "GrantRight":
+                rightTaken = true;
                 break;
-
+            case "Tick":
+                // no-op here; step already incremented
+                break;
             default:
-                // Console.Error.WriteLine("ERROR: unknown action \"" + action + "\" from coordinator to " + name);
+                // unknown action
                 break;
         }
+
         if (leftTaken && rightTaken)
         {
+            // accumulate waiting time spent hungry
+            totalHungrySteps += step;
             step = 0;
             state = State.TAKING_FORK;
         }
-        else
-        {
-            step = 0;
-            state = State.HUNGRY;
-            // ReleaseForks();
-        }
     }
 
-    private void FinishedEating(string action)
+    private void FinishedEating()
     {
-        // switch (action)
-        // {
-        //     case "Release left":
-        //         left.Release();
-        //         break;
-
-        //     case "Release right":
-        //         right.Release();
-        //         break;
-
-        //     default:
-        //         // Console.Error.WriteLine("ERROR: unknown action \"" + action + "\" from coordinator to " + name);
-        //         break;
-        // }
         ReleaseForks();
         if (!leftTaken && !rightTaken)
         {
@@ -175,7 +167,6 @@ public class Philosopher
         else
         {
             step = 0;
-            // ReleaseForks();
         }
     }
 
@@ -186,9 +177,9 @@ public class Philosopher
             left.Take(name);
             leftTaken = true;
         }
-        catch (System.Exception e)
+        catch (System.Exception)
         {
-            // Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
+            // ignore
         }
     }
 
@@ -199,9 +190,9 @@ public class Philosopher
             right.Take(name);
             rightTaken = true;
         }
-        catch (System.Exception e)
+        catch (System.Exception)
         {
-            // Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
+            // ignore
         }
     }
 
@@ -247,6 +238,8 @@ public class Philosopher
     {
         left.Release();
         right.Release();
+        leftTaken = false;
+        rightTaken = false;
     }
 
     private void FinishedThinking()
@@ -256,6 +249,7 @@ public class Philosopher
         state = State.HUNGRY;
     }
 
+    // Strategy-driven hungry handling (no coordinator)
     private void FinishedHungry()
     {
         if (left == null)
@@ -277,20 +271,18 @@ public class Philosopher
                 {
                     right.Take(name);
                 }
-                catch (System.Exception e)
+                catch (System.Exception)
                 {
                     state = State.HUNGRY;
                     step = 0;
                     left.Release();
-                    // Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
                     return;
                 }
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
                 state = State.HUNGRY;
                 step = 0;
-                // Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
                 return;
             }
         }
@@ -303,34 +295,24 @@ public class Philosopher
                 {
                     left.Take(name);
                 }
-                catch (System.Exception e)
+                catch (System.Exception)
                 {
                     state = State.HUNGRY;
                     step = 0;
                     right.Release();
-                    Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
                     return;
                 }
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
                 state = State.HUNGRY;
                 step = 0;
-                Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
                 return;
             }
         }
+        // when using a strategy (no coordinator), the philosopher actually takes forks here
         step = 0;
         state = State.TAKING_FORK;
-    }
-
-    private void FinishedEating()
-    {
-        eaten++;
-        step = 0;
-        stepsToEat = (uint)random.Next((int)minStepsToEat, (int)maxStepsToEat + 1);
-        ReleaseForks();
-        state = State.THINKING;
     }
 
     private void FinishedTakingFork()
@@ -338,7 +320,6 @@ public class Philosopher
         step = 0;
         state = State.EATING;
     }
-
 
 
     public State GetState()
@@ -354,6 +335,47 @@ public class Philosopher
     public uint GetEaten()
     {
         return eaten;
+    }
+
+    public uint GetTotalHungry()
+    {
+        return totalHungrySteps;
+    }
+
+    // Public command entry point - philosopher only performs actions it's told.
+    public void OnCommand(string command)
+    {
+        switch (command)
+        {
+            case "TakeLeft":
+                TryTakeLeft();
+                break;
+            case "TakeRight":
+                TryTakeRight();
+                break;
+            case "GrantLeft":
+                leftTaken = true;
+                break;
+            case "GrantRight":
+                rightTaken = true;
+                break;
+            case "Release":
+                ReleaseForks();
+                break;
+            case "Tick":
+                Do(this, "Tick");
+                break;
+            default:
+                // unknown command - ignore
+                break;
+        }
+
+        // If both forks are taken (either by TryTake or by Grant), transition to TAKING_FORK
+        if (leftTaken && rightTaken && state == State.HUNGRY)
+        {
+            state = State.TAKING_FORK;
+            step = 0;
+        }
     }
 
     public string GetCurrentAction()
@@ -376,9 +398,4 @@ public class Philosopher
                 return "";
         }
     }
-
-    // public uint GetEaten()
-    // {
-    //     return eaten;
-    // }
 }

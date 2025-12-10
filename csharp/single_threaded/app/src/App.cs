@@ -32,7 +32,7 @@ class Program
             {
                 philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], strategy, settings.MAX_STEPS_TO_EAT!.Value, settings.MIN_STEPS_TO_EAT!.Value, settings.MAX_STEPS_TO_THINK!.Value, settings.MIN_STEPS_TO_THINK!.Value);
             }
-            Run(settings, philosophers, forks, settings.MAX_NUMBER_OF_STEPS);
+            Run(settings, philosophers, forks, settings.MAX_NUMBER_OF_STEPS, strategy);
         }
     }
 
@@ -63,7 +63,7 @@ class Program
         return new AlwaysRightStrategy();
     }
 
-    private static void Run(Settings settings, Philosopher[] philosophers, Fork[] forks, uint? MAX_NUM_STEPS)
+    private static void Run(Settings settings, Philosopher[] philosophers, Fork[] forks, uint? MAX_NUM_STEPS, Strategy strategy)
     {
         Metrics metrics = new(forks, philosophers);
         uint step = 0;
@@ -72,15 +72,23 @@ class Program
             PrintState(philosophers, step, forks);
             for (int i = 0; i < philosophers.Length; i++)
             {
+                // Strategy tells the philosopher which fork to try taking when hungry.
+                if (philosophers[i].GetState() == coordinator.Philosopher.State.HUNGRY)
+                {
+                    string move = strategy.NextMove();
+                    if (move == "left") philosophers[i].OnCommand("TakeLeft");
+                    else philosophers[i].OnCommand("TakeRight");
+                }
+
+                // Advance internal philosopher timers / states
                 philosophers[i].MakeMove();
             }
             step++;
             if (step == settings.METRIC_FREQ - 1)
             {
                 metrics.GetData();
-            }
+            }// metrics.Print();
         }
-        // metrics.Print();
     }
 
     private static void PrintState(Philosopher[] philosophers, uint currentStep, Fork[] forks)

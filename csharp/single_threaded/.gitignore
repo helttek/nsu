@@ -1,0 +1,6 @@
+app/bin
+app/obj
+coordinator/bin
+coordinator/obj
+strategy/bin
+strategy/obj
