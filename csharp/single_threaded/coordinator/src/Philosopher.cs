@@ -22,7 +22,6 @@ public class Philosopher
     private uint stepsToThink;
     private uint stepsToTakeFork;
     private uint eaten;
-    private uint totalHungrySteps;
     private string name;
     private State state;
     private Strategy? strategy;
@@ -51,7 +50,6 @@ public class Philosopher
         this.right = right;
         this.leftTaken = false;
         this.rightTaken = false;
-        this.totalHungrySteps = 0;
     }
 
     public Philosopher(string name, ref Fork left, ref Fork right, Coordinator coordinator, uint maxStepsToEat, uint minStepsToEat, uint maxStepsToThink, uint minStepsToThink)
@@ -75,7 +73,6 @@ public class Philosopher
         this.coordinator.Action += Do;
         this.rightTaken = false;
         this.leftTaken = false;
-        this.totalHungrySteps = 0;
     }
 
     // Called by Coordinator via event in coordinator-driven simulation
@@ -147,8 +144,6 @@ public class Philosopher
 
         if (leftTaken && rightTaken)
         {
-            // accumulate waiting time spent hungry
-            totalHungrySteps += step;
             step = 0;
             state = State.TAKING_FORK;
         }
@@ -235,11 +230,6 @@ public class Philosopher
     public uint GetEaten()
     {
         return eaten;
-    }
-
-    public uint GetTotalHungry()
-    {
-        return totalHungrySteps;
     }
 
     // Public command entry point - philosopher only performs actions it's told.

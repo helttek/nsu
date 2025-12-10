@@ -72,23 +72,33 @@ class Program
             PrintState(philosophers, step, forks);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                // Strategy tells the philosopher which fork to try taking when hungry.
+                // Strategy tells the philosopher which fork to try taking first when hungry.
                 if (philosophers[i].GetState() == coordinator.Philosopher.State.HUNGRY)
                 {
-                    string move = strategy.NextMove();
-                    if (move == "left") philosophers[i].OnCommand("TakeLeft");
-                    else philosophers[i].OnCommand("TakeRight");
+                    string firstMove = strategy.NextMove();
+                    if (firstMove == "left")
+                    {
+                        philosophers[i].OnCommand("TakeLeft");
+                        philosophers[i].OnCommand("TakeRight");
+                    }
+                    else
+                    {
+                        philosophers[i].OnCommand("TakeRight");
+                        philosophers[i].OnCommand("TakeLeft");
+                    }
                 }
 
                 // Advance internal philosopher timers / states via Tick command
                 philosophers[i].OnCommand("Tick");
             }
+            metrics.RecordStep();
             step++;
             if (step == settings.METRIC_FREQ - 1)
             {
                 metrics.GetData();
-            }// metrics.Print();
+            }
         }
+        metrics.Print();
     }
 
     private static void PrintState(Philosopher[] philosophers, uint currentStep, Fork[] forks)
@@ -127,12 +137,14 @@ class Program
         {
             PrintState(philosophers, step, forks);
             coordinator.SimulateStep();
+            metrics.RecordStep();
             step++;
+            if (step == settings.METRIC_FREQ - 1)
+            {
+                metrics.GetData();
+            }
         }
-        if (step == settings.METRIC_FREQ - 1)
-        {
-            metrics.GetData();
-        }
+        metrics.Print();
     }
 
     //TODO: 
