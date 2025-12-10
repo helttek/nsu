@@ -1,8 +1,8 @@
 namespace strategy;
 
-public class AlwaysRight : Strategy
+public class AlwaysRightStrategy : Strategy
 {
-    public AlwaysRight()
+    public AlwaysRightStrategy()
     {
     }
 

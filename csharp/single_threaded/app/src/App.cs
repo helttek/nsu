@@ -1,58 +1,38 @@
 ﻿using System.Net.Http.Metrics;
 using System.Text.Json;
 using coordinator;
+using Microsoft.Extensions.Hosting;
 using strategy;
+using Microsoft.Extensions.Configuration;
+
 namespace app;
 
 class Program
 {
-    private const uint DEFAULT_MAX_NUM_STEPS = 100;
-    private const uint METRIC_FREQ = 1000;
-
     static void Main()
     {
-        Settings? settings = GetSettings("appsettings.json");
-        ValidateSettings(ref settings);
+        Settings? settings = Host.CreateApplicationBuilder().Configuration.Get<Settings>();
+        settings!.Validate();
 
-        Philosopher[] philosophers = new Philosopher[settings.Philosophers.Length];
+        Philosopher[] philosophers = new Philosopher[settings.Philosophers!.Length];
         Fork[] forks = CreateForks(settings.Philosophers.Length);
         if (settings.UseCoordinator == true)
         {
             Coordinator coordinator = new(philosophers, forks);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], coordinator);
+                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], coordinator, settings.MAX_STEPS_TO_EAT!.Value, settings.MIN_STEPS_TO_EAT!.Value, settings.MAX_STEPS_TO_THINK!.Value, settings.MIN_STEPS_TO_THINK!.Value);
             }
-            Run(ref philosophers, ref coordinator, forks, settings.MaxNumberOfSteps);
+            Run(settings, ref philosophers, ref coordinator, forks, settings.MAX_NUMBER_OF_STEPS);
         }
         else
         {
             Strategy strategy = GetStrategy(settings.Strategy);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], strategy);
+                philosophers[i] = new Philosopher(settings.Philosophers[i], ref forks[i], ref forks[(i + 1) % philosophers.Length], strategy, settings.MAX_STEPS_TO_EAT!.Value, settings.MIN_STEPS_TO_EAT!.Value, settings.MAX_STEPS_TO_THINK!.Value, settings.MIN_STEPS_TO_THINK!.Value);
             }
-            Run(philosophers, forks, settings.MaxNumberOfSteps);
-        }
-    }
-
-    private static Settings GetSettings(string fileName)
-    {
-        try
-        {
-            var settingsString = File.ReadAllText(fileName);
-            try
-            {
-                return JsonSerializer.Deserialize<Settings>(settingsString);
-            }
-            catch (System.Exception e)
-            {
-                throw new Exception("Failed to load settings: " + e.Message);
-            }
-        }
-        catch (System.Exception e)
-        {
-            throw new Exception("Failed to read file as text: " + e.Message);
+            Run(settings, philosophers, forks, settings.MAX_NUMBER_OF_STEPS);
         }
     }
 
@@ -66,23 +46,6 @@ class Program
         return forks;
     }
 
-    private static void ValidateSettings(ref Settings? settings)
-    {
-        if (settings == null)
-        {
-            throw new Exception("settings are null");
-        }
-        if (settings.Philosophers == null)
-        {
-            throw new Exception("Philosophers names in settings are null");
-        }
-        if (settings.MaxNumberOfSteps == null)
-        {
-            Console.Error.WriteLine("ERROR: number of steps in settings is null. Using defaulr value: " + DEFAULT_MAX_NUM_STEPS.ToString() + ".");
-            settings.MaxNumberOfSteps = DEFAULT_MAX_NUM_STEPS;
-        }
-    }
-
     private static Strategy GetStrategy(string? strategy)
     {
         if (strategy != null)
@@ -90,17 +53,17 @@ class Program
             switch (strategy)
             {
                 case "AlwaysRight":
-                    return new AlwaysRight();
+                    return new AlwaysRightStrategy();
 
                 default:
-                    Console.WriteLine("No known strategy was provided, using default one.");
-                    return new AlwaysRight();
+                    Console.WriteLine("WARNING: No known strategy was provided, using default one: Always Right.");
+                    return new AlwaysRightStrategy();
             }
         }
-        return new AlwaysRight();
+        return new AlwaysRightStrategy();
     }
 
-    private static void Run(Philosopher[] philosophers, Fork[] forks, uint? MAX_NUM_STEPS)
+    private static void Run(Settings settings, Philosopher[] philosophers, Fork[] forks, uint? MAX_NUM_STEPS)
     {
         Metrics metrics = new(forks, philosophers);
         uint step = 0;
@@ -112,7 +75,7 @@ class Program
                 philosophers[i].MakeMove();
             }
             step++;
-            if (step == METRIC_FREQ - 1)
+            if (step == settings.METRIC_FREQ - 1)
             {
                 metrics.GetData();
             }
@@ -148,7 +111,7 @@ class Program
         Console.WriteLine();
     }
 
-    private static void Run(ref Philosopher[] philosophers, ref Coordinator coordinator, Fork[] forks, uint? MAX_NUM_STEPS)
+    private static void Run(Settings settings, ref Philosopher[] philosophers, ref Coordinator coordinator, Fork[] forks, uint? MAX_NUM_STEPS)
     {
         Metrics metrics = new(forks, philosophers);
         uint step = 0;
@@ -158,15 +121,13 @@ class Program
             coordinator.SimulateStep();
             step++;
         }
-        if (step == METRIC_FREQ - 1)
+        if (step == settings.METRIC_FREQ - 1)
         {
             metrics.GetData();
         }
     }
 
     //TODO: 
-    // - find a class that uses the appsettings.json file natively
-    // - move the settings validation to the settings class
     // - clean up enums and hardcoded values
     // - the logic of choosing which and how forks to take should be in the strategy class
     // - fix the coordinator events for better reusability

@@ -4,8 +4,8 @@ public class Fork
 {
     public enum State : byte
     {
-        Available,
-        InUse
+        AVAILABLE,
+        IN_USE
     }
 
     private State state;
@@ -13,15 +13,15 @@ public class Fork
 
     public Fork()
     {
-        this.state = State.Available;
+        this.state = State.AVAILABLE;
         usedBy = null;
     }
 
     public void Take(string philosopherName)
     {
-        if (state == State.Available)
+        if (state == State.AVAILABLE)
         {
-            state = State.InUse; // should there be a state "IsBeingTaken"
+            state = State.IN_USE; // should there be a state "IsBeingTaken"
             usedBy = philosopherName;
         }
         else
@@ -42,12 +42,12 @@ public class Fork
 
     public void Release()
     {
-        state = State.Available;
+        state = State.AVAILABLE;
         usedBy = null;
     }
 
     public bool IsAvailable()
     {
-        return state == State.Available;
+        return state == State.AVAILABLE;
     }
 }

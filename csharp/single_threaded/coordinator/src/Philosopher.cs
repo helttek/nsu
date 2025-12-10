@@ -7,15 +7,15 @@ public class Philosopher
 {
     public enum State : byte
     {
-        Thinking,
-        Hungry,
-        Eating,
-        TakingFork
+        THINKING,
+        HUNGRY,
+        EATING,
+        TAKING_FORK
     }
-    private const int maxStepsToEat = 5;
-    private const int minStepsToEat = 4;
-    private const int maxStepsToThink = 10;
-    private const int minStepsToThink = 3;
+    private uint minStepsToEat;
+    private uint maxStepsToEat;
+    private uint minStepsToThink;
+    private uint maxStepsToThink;
     private Random random;
     private uint step;
     private uint stepsToEat;
@@ -31,30 +31,38 @@ public class Philosopher
     private bool leftTaken;
     private bool rightTaken;
 
-    public Philosopher(string name, ref Fork left, ref Fork right, Strategy strategy)
+    public Philosopher(string name, ref Fork left, ref Fork right, Strategy strategy, uint maxStepsToEat, uint minStepsToEat, uint maxStepsToThink, uint minStepsToThink)
     {
-        this.state = State.Hungry;
+        this.state = State.HUNGRY;
         this.name = name;
         this.strategy = strategy;
         this.step = 0;
         this.random = new Random();
-        this.stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
-        this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
+        this.maxStepsToEat = maxStepsToEat;
+        this.minStepsToEat = minStepsToEat;
+        this.maxStepsToThink = maxStepsToThink;
+        this.minStepsToThink = minStepsToThink;
+        this.stepsToEat = (uint)random.Next((int)minStepsToEat, (int)maxStepsToEat + 1);
+        this.stepsToThink = (uint)random.Next((int)minStepsToThink, (int)maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
         this.eaten = 0;
         this.left = left;
         this.right = right;
     }
 
-    public Philosopher(string name, ref Fork left, ref Fork right, Coordinator coordinator)
+    public Philosopher(string name, ref Fork left, ref Fork right, Coordinator coordinator, uint maxStepsToEat, uint minStepsToEat, uint maxStepsToThink, uint minStepsToThink)
     {
-        this.state = State.Hungry;
+        this.state = State.HUNGRY;
         this.name = name;
         this.strategy = null;
         this.step = 0;
         this.random = new Random();
-        this.stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
-        this.stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
+        this.maxStepsToEat = maxStepsToEat;
+        this.minStepsToEat = minStepsToEat;
+        this.maxStepsToThink = maxStepsToThink;
+        this.minStepsToThink = minStepsToThink;
+        this.stepsToEat = (uint)random.Next((int)minStepsToEat, (int)maxStepsToEat + 1);
+        this.stepsToThink = (uint)random.Next((int)minStepsToThink, (int)maxStepsToThink + 1);
         this.stepsToTakeFork = 2;
         this.eaten = 0;
         this.left = left;
@@ -78,11 +86,11 @@ public class Philosopher
         }
         switch (state)
         {
-            case State.Hungry:
+            case State.HUNGRY:
                 FinishedHungry(action);
                 break;
 
-            case State.TakingFork:
+            case State.TAKING_FORK:
                 if (step >= stepsToTakeFork)
                 {
                     FinishedTakingFork();
@@ -90,7 +98,7 @@ public class Philosopher
                 }
                 break;
 
-            case State.Eating:
+            case State.EATING:
                 if (step >= stepsToEat)
                 {
                     FinishedEating(action);
@@ -98,7 +106,7 @@ public class Philosopher
                 }
                 break;
 
-            case State.Thinking:
+            case State.THINKING:
                 if (step >= stepsToThink)
                 {
                     FinishedThinking();
@@ -130,12 +138,12 @@ public class Philosopher
         if (leftTaken && rightTaken)
         {
             step = 0;
-            state = State.TakingFork;
+            state = State.TAKING_FORK;
         }
         else
         {
             step = 0;
-            state = State.Hungry;
+            state = State.HUNGRY;
             // ReleaseForks();
         }
     }
@@ -161,8 +169,8 @@ public class Philosopher
         {
             eaten++;
             step = 0;
-            stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
-            state = State.Thinking;
+            stepsToEat = (uint)random.Next((int)minStepsToEat, (int)maxStepsToEat + 1);
+            state = State.THINKING;
         }
         else
         {
@@ -202,11 +210,11 @@ public class Philosopher
         step++;
         switch (state)
         {
-            case State.Hungry:
+            case State.HUNGRY:
                 FinishedHungry();
                 break;
 
-            case State.TakingFork:
+            case State.TAKING_FORK:
                 if (step >= stepsToTakeFork)
                 {
                     FinishedTakingFork();
@@ -214,7 +222,7 @@ public class Philosopher
                 }
                 break;
 
-            case State.Eating:
+            case State.EATING:
                 if (step >= stepsToEat)
                 {
                     FinishedEating();
@@ -222,7 +230,7 @@ public class Philosopher
                 }
                 break;
 
-            case State.Thinking:
+            case State.THINKING:
                 if (step >= stepsToThink)
                 {
                     FinishedThinking();
@@ -244,8 +252,8 @@ public class Philosopher
     private void FinishedThinking()
     {
         step = 0;
-        stepsToThink = (uint)random.Next(minStepsToThink, maxStepsToThink + 1);
-        state = State.Hungry;
+        stepsToThink = (uint)random.Next((int)minStepsToThink, (int)maxStepsToThink + 1);
+        state = State.HUNGRY;
     }
 
     private void FinishedHungry()
@@ -271,7 +279,7 @@ public class Philosopher
                 }
                 catch (System.Exception e)
                 {
-                    state = State.Hungry;
+                    state = State.HUNGRY;
                     step = 0;
                     left.Release();
                     // Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
@@ -280,7 +288,7 @@ public class Philosopher
             }
             catch (System.Exception e)
             {
-                state = State.Hungry;
+                state = State.HUNGRY;
                 step = 0;
                 // Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
                 return;
@@ -297,7 +305,7 @@ public class Philosopher
                 }
                 catch (System.Exception e)
                 {
-                    state = State.Hungry;
+                    state = State.HUNGRY;
                     step = 0;
                     right.Release();
                     Console.Error.WriteLine(name + ": failed to take the left fork: " + e.Message);
@@ -306,29 +314,29 @@ public class Philosopher
             }
             catch (System.Exception e)
             {
-                state = State.Hungry;
+                state = State.HUNGRY;
                 step = 0;
                 Console.Error.WriteLine(name + ": failed to take the right fork: " + e.Message);
                 return;
             }
         }
         step = 0;
-        state = State.TakingFork;
+        state = State.TAKING_FORK;
     }
 
     private void FinishedEating()
     {
         eaten++;
         step = 0;
-        stepsToEat = (uint)random.Next(minStepsToEat, maxStepsToEat + 1);
+        stepsToEat = (uint)random.Next((int)minStepsToEat, (int)maxStepsToEat + 1);
         ReleaseForks();
-        state = State.Thinking;
+        state = State.THINKING;
     }
 
     private void FinishedTakingFork()
     {
         step = 0;
-        state = State.Eating;
+        state = State.EATING;
     }
 
 
@@ -352,16 +360,16 @@ public class Philosopher
     {
         switch (state)
         {
-            case State.Hungry:
+            case State.HUNGRY:
                 return "Available actions: TakeRightFork | TakeLeftFork";
 
-            case State.TakingFork:
+            case State.TAKING_FORK:
                 return Convert.ToString(stepsToTakeFork - step) + " steps left";
 
-            case State.Eating:
+            case State.EATING:
                 return Convert.ToString(stepsToEat - step) + " steps left";
 
-            case State.Thinking:
+            case State.THINKING:
                 return Convert.ToString(stepsToThink - step) + " steps left";
 
             default:
