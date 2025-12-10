@@ -196,43 +196,7 @@ public class Philosopher
         }
     }
 
-    public void MakeMove()
-    {
-        step++;
-        switch (state)
-        {
-            case State.HUNGRY:
-                FinishedHungry();
-                break;
-
-            case State.TAKING_FORK:
-                if (step >= stepsToTakeFork)
-                {
-                    FinishedTakingFork();
-                    return;
-                }
-                break;
-
-            case State.EATING:
-                if (step >= stepsToEat)
-                {
-                    FinishedEating();
-                    return;
-                }
-                break;
-
-            case State.THINKING:
-                if (step >= stepsToThink)
-                {
-                    FinishedThinking();
-                    return;
-                }
-                break;
-
-            default:
-                throw new Exception("Error: " + name + " has unknown state");
-        }
-    }
+    // Time advancement is now driven via OnCommand("Tick") / Coordinator events.
 
     private void ReleaseForks()
     {
@@ -249,71 +213,7 @@ public class Philosopher
         state = State.HUNGRY;
     }
 
-    // Strategy-driven hungry handling (no coordinator)
-    private void FinishedHungry()
-    {
-        if (left == null)
-        {
-            throw new Exception("ERROR " + name + ": left fork is null (wtf)");
-        }
-        if (right == null)
-        {
-            throw new Exception("ERROR " + name + ": right fork is null (wtf)");
-        }
-        string? firstMove = strategy?.NextMove();
-        if (firstMove == null) { throw new Exception(name + ": Strategy is null"); }
-        if (firstMove == "left")
-        {
-            try
-            {
-                left.Take(name);
-                try
-                {
-                    right.Take(name);
-                }
-                catch (System.Exception)
-                {
-                    state = State.HUNGRY;
-                    step = 0;
-                    left.Release();
-                    return;
-                }
-            }
-            catch (System.Exception)
-            {
-                state = State.HUNGRY;
-                step = 0;
-                return;
-            }
-        }
-        else
-        {
-            try
-            {
-                right.Take(name);
-                try
-                {
-                    left.Take(name);
-                }
-                catch (System.Exception)
-                {
-                    state = State.HUNGRY;
-                    step = 0;
-                    right.Release();
-                    return;
-                }
-            }
-            catch (System.Exception)
-            {
-                state = State.HUNGRY;
-                step = 0;
-                return;
-            }
-        }
-        // when using a strategy (no coordinator), the philosopher actually takes forks here
-        step = 0;
-        state = State.TAKING_FORK;
-    }
+    // Note: strategy-driven fork-taking removed; philosophers act only on commands.
 
     private void FinishedTakingFork()
     {

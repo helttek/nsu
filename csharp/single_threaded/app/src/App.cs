@@ -80,8 +80,8 @@ class Program
                     else philosophers[i].OnCommand("TakeRight");
                 }
 
-                // Advance internal philosopher timers / states
-                philosophers[i].MakeMove();
+                // Advance internal philosopher timers / states via Tick command
+                philosophers[i].OnCommand("Tick");
             }
             step++;
             if (step == settings.METRIC_FREQ - 1)
