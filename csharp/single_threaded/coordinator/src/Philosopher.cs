@@ -75,7 +75,6 @@ public class Philosopher
         this.leftTaken = false;
     }
 
-    // Called by Coordinator via event in coordinator-driven simulation
     private void Do(Philosopher philosopher, string action)
     {
         if (philosopher != this)
@@ -83,9 +82,22 @@ public class Philosopher
             return;
         }
 
-        if (action == "Tick")
+        switch (action)
         {
-            step++;
+            case "Tick":
+                step++;
+                break;
+
+            case "TakeLeft":
+                TryTakeLeft();
+                break;
+
+            case "TakeRight":
+                TryTakeRight();
+                break;
+
+            default:
+                throw new Exception("Unknown action: " + action);
         }
 
         switch (state)
@@ -123,25 +135,8 @@ public class Philosopher
         }
     }
 
-    // Coordinator-driven: react to grants
     private void FinishedHungry(string action)
     {
-        switch (action)
-        {
-            case "GrantLeft":
-                leftTaken = true;
-                break;
-            case "GrantRight":
-                rightTaken = true;
-                break;
-            case "Tick":
-                // no-op here; step already incremented
-                break;
-            default:
-                // unknown action
-                break;
-        }
-
         if (leftTaken && rightTaken)
         {
             step = 0;
@@ -191,8 +186,6 @@ public class Philosopher
         }
     }
 
-    // Time advancement is now driven via OnCommand("Tick") / Coordinator events.
-
     private void ReleaseForks()
     {
         left.Release();
@@ -207,8 +200,6 @@ public class Philosopher
         stepsToThink = (uint)random.Next((int)minStepsToThink, (int)maxStepsToThink + 1);
         state = State.HUNGRY;
     }
-
-    // Note: strategy-driven fork-taking removed; philosophers act only on commands.
 
     private void FinishedTakingFork()
     {
@@ -232,7 +223,6 @@ public class Philosopher
         return eaten;
     }
 
-    // Public command entry point - philosopher only performs actions it's told.
     public void OnCommand(string command)
     {
         switch (command)
@@ -243,12 +233,6 @@ public class Philosopher
             case "TakeRight":
                 TryTakeRight();
                 break;
-            case "GrantLeft":
-                leftTaken = true;
-                break;
-            case "GrantRight":
-                rightTaken = true;
-                break;
             case "Release":
                 ReleaseForks();
                 break;
@@ -256,11 +240,9 @@ public class Philosopher
                 Do(this, "Tick");
                 break;
             default:
-                // unknown command - ignore
-                break;
+                throw new Exception("Unknown command: " + command);
         }
 
-        // If both forks are taken (either by TryTake or by Grant), transition to TAKING_FORK
         if (leftTaken && rightTaken && state == State.HUNGRY)
         {
             state = State.TAKING_FORK;

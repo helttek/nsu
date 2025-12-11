@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Metrics;
-using System.Text.Json;
-using coordinator;
+﻿using coordinator;
 using Microsoft.Extensions.Hosting;
 using strategy;
 using Microsoft.Extensions.Configuration;
@@ -72,7 +70,6 @@ class Program
             PrintState(philosophers, step, forks);
             for (int i = 0; i < philosophers.Length; i++)
             {
-                // Strategy tells the philosopher which fork to try taking first when hungry.
                 if (philosophers[i].GetState() == coordinator.Philosopher.State.HUNGRY)
                 {
                     string firstMove = strategy.NextMove();
@@ -88,14 +85,13 @@ class Program
                     }
                 }
 
-                // Advance internal philosopher timers / states via Tick command
                 philosophers[i].OnCommand("Tick");
             }
             metrics.RecordStep();
             step++;
             if (step == settings.METRIC_FREQ - 1)
             {
-                metrics.GetData();
+                metrics.Print();
             }
         }
         metrics.Print();
@@ -117,7 +113,7 @@ class Program
         for (int i = 0; i < forks.Length; i++)
         {
             Console.Write("Fork-" + Convert.ToString(i + 1) + ": " + forks[i].GetState());
-            if (forks[i].GetState() == "InUse")
+            if (forks[i].GetState() == Fork.State.IN_USE.ToString())
             {
                 Console.WriteLine(" (" + forks[i].UsedBy() + ")");
             }
@@ -141,7 +137,7 @@ class Program
             step++;
             if (step == settings.METRIC_FREQ - 1)
             {
-                metrics.GetData();
+                metrics.Print();
             }
         }
         metrics.Print();

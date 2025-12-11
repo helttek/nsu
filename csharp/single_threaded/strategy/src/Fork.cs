@@ -21,7 +21,7 @@ public class Fork
     {
         if (state == State.AVAILABLE)
         {
-            state = State.IN_USE; // should there be a state "IsBeingTaken"
+            state = State.IN_USE;
             usedBy = philosopherName;
         }
         else

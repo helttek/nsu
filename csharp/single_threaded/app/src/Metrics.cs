@@ -22,7 +22,6 @@ class Metrics
         hungerStartStep = new uint[philosophers.Length];
         totalHungerSteps = new uint[philosophers.Length];
         
-        // Initialize last state to current state
         for (int i = 0; i < philosophers.Length; i++)
         {
             lastPhilosopherState[i] = philosophers[i].GetState();
@@ -31,7 +30,6 @@ class Metrics
 
     public void RecordStep()
     {
-        // Track fork states each step
         for (int i = 0; i < forks.Length; i++)
         {
             if (forks[i].GetState() == "AVAILABLE")
@@ -70,12 +68,6 @@ class Metrics
         }
 
         totalSteps++;
-    }
-
-    public void GetData()
-    {
-        // Placeholder for snapshot metrics if needed
-        Print();
     }
 
     public void Print()
