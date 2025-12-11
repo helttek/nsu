@@ -20,6 +20,13 @@ class Program
         using CancellationTokenSource cts = new();
         Philosopher[] philosophers = CreatePhilosophers(philosophersNames, forks, strategy, cts.Token, settings);
 
+        // using DeadlockDetector detector = new DeadlockDetector(forks, TimeSpan.FromMilliseconds(200));
+        // detector.OnDeadlockDetected += cycle =>
+        // {
+        //     Console.WriteLine("DEADLOCK DETECTED: " + string.Join(" -> ", cycle));
+        //     cts.Cancel();
+        // };
+
         // Запускаем потоки философов
         foreach (var p in philosophers)
         {

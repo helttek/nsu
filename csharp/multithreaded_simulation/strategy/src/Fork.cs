@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 
 namespace strategy;
@@ -51,6 +52,7 @@ public class Fork
         // Optimistic short wait to avoid long blocking and reduce deadlocks.
         if (!Monitor.TryEnter(sync))
         {
+            LockTracker.RegisterWaiting(philosopherName, id);
             return false;
         }
 
@@ -58,12 +60,15 @@ public class Fork
         {
             if (state != State.AVAILABLE)
             {
+                LockTracker.RegisterWaiting(philosopherName, id);
                 return false;
             }
 
             UpdateDurations(State.IN_USE);
             usedBy = philosopherName;
             state = State.IN_USE;
+            LockTracker.RegisterAcquired(philosopherName, id);
+            LockTracker.ClearWaiting(philosopherName, id);
         }
         finally
         {
@@ -84,6 +89,7 @@ public class Fork
                 UpdateDurations(State.AVAILABLE);
                 state = State.AVAILABLE;
                 usedBy = null;
+                LockTracker.RegisterReleased(philosopherName, id);
             }
         }
     }
