@@ -8,6 +8,10 @@ namespace app;
 
 class Program
 {
+
+    //todo:
+    // - join not needed?
+    // - fix deadlock detection (use something simple)
     static void Main()
     {
         Settings? settings = Host.CreateApplicationBuilder().Configuration.Get<Settings>();
@@ -20,12 +24,12 @@ class Program
         using CancellationTokenSource cts = new();
         Philosopher[] philosophers = CreatePhilosophers(philosophersNames, forks, strategy, cts.Token, settings);
 
-        // using DeadlockDetector detector = new DeadlockDetector(forks, TimeSpan.FromMilliseconds(200));
-        // detector.OnDeadlockDetected += cycle =>
-        // {
-        //     Console.WriteLine("DEADLOCK DETECTED: " + string.Join(" -> ", cycle));
-        //     cts.Cancel();
-        // };
+        using DeadlockDetector detector = new DeadlockDetector(forks, TimeSpan.FromMilliseconds(200));
+        detector.OnDeadlockDetected += cycle =>
+        {
+            Console.WriteLine("DEADLOCK DETECTED: " + string.Join(" -> ", cycle));
+            cts.Cancel();
+        };
 
         // Запускаем потоки философов
         foreach (var p in philosophers)
@@ -98,12 +102,7 @@ class Program
             step++;
         }
 
-        // Завершаем работу
         cts.Cancel();
-        foreach (var p in philosophers)
-        {
-            p.Join();
-        }
 
         metrics.Print();
     }

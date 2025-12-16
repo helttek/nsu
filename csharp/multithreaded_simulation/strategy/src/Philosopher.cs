@@ -47,8 +47,8 @@ public class Philosopher
         this.eatMinMs = eatMinMs;
         this.eatMaxMs = eatMaxMs;
         random = new Random(Environment.TickCount + index);
-        state = State.THINKING;// maybe make it Hungry by default?
-        currentAction = "Thinking";
+        state = State.HUNGRY;
+        currentAction = "Hungry";
         worker = new Thread(Run) { IsBackground = true, Name = $"Philosopher-{name}" };
     }
 

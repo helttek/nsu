@@ -49,7 +49,6 @@ public class Fork
 
     public bool TryTake(string philosopherName, int acquisitionDelayMs, CancellationToken token)
     {
-        // Optimistic short wait to avoid long blocking and reduce deadlocks.
         if (!Monitor.TryEnter(sync))
         {
             LockTracker.RegisterWaiting(philosopherName, id);
