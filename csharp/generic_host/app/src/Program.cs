@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using strategy;
+using System.Timers;
 
 namespace App;
 
@@ -14,30 +15,22 @@ internal class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
 
-        // Take an early snapshot to know how many philosophers to register.
         SimulationOptions simOptions = new();
         builder.Configuration.GetSection("Simulation").Bind(simOptions);
-        simOptions.EnsureDefaults();
+        simOptions.Validate();
 
-        builder.Services.Configure<SimulationOptions>(builder.Configuration.GetSection("Simulation"));
-        builder.Services.AddSingleton(simOptions);
+        builder.Services.AddSingleton(Options.Create(simOptions));
 
         builder.Services.AddSingleton<ITableManager>(sp => new TableManager(simOptions));
-        builder.Services.AddSingleton<IPhilosopherRegistry, PhilosopherRegistry>();
         builder.Services.AddSingleton<IMetricsCollector, MetricsCollector>();
+        builder.Services.AddSingleton<IPhilosopherRegistry, PhilosopherRegistry>();
 
-        builder.Services.AddSingleton<Strategy>(sp =>
+        IPhilosopherStrategy GetStrategy(string name) => name switch
         {
-            string? name = simOptions.Strategy;
-            return name switch
-            {
-                "AlwaysRight" => new AlwaysRightStrategy(),
-                "LeftRight" => new LeftRightStrategy(),
-                _ => new LeftRightStrategy()
-            };
-        });
+            "Plato" => new LeftRightStrategy(),
+            _ => new AlwaysRightStrategy()
+        };
 
-        // Register each philosopher as a separate hosted service.
         for (int i = 0; i < simOptions.Philosophers.Length; i++)
         {
             int index = i;
@@ -47,7 +40,7 @@ internal class Program
                 philosopherName,
                 index,
                 sp.GetRequiredService<ITableManager>(),
-                sp.GetRequiredService<Strategy>(),
+                GetStrategy(philosopherName),
                 sp.GetRequiredService<IPhilosopherRegistry>(),
                 sp.GetRequiredService<IOptions<SimulationOptions>>(),
                 sp.GetRequiredService<ILogger<PhilosopherHostedService>>()));
@@ -55,7 +48,28 @@ internal class Program
 
         builder.Services.AddHostedService<StatusPrinterHostedService>();
 
+        builder.Services.AddSingleton<DeadlockDetector>(sp =>
+        {
+            var philosophers = sp.GetRequiredService<IEnumerable<IHostedService>>().OfType<IPhilosopher>();
+            return new DeadlockDetector(philosophers, TimeSpan.FromMilliseconds(simOptions.DeadlockDetectionIntervalMs!.Value));
+        });
+
         using IHost host = builder.Build();
+
+        var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+        var detector = host.Services.GetRequiredService<DeadlockDetector>();
+        detector.OnDeadlockDetected += cycle =>
+        {
+            Console.WriteLine("DEADLOCK DETECTED: " + string.Join(" -> ", cycle));
+            lifetime.StopApplication();
+        };
+
+        var sysTimer = new System.Timers.Timer(simOptions.DurationSeconds * 1000) { AutoReset = false };
+        sysTimer.Elapsed += (s, e) => lifetime.StopApplication();
+        sysTimer.Start();
+
         await host.RunAsync();
+
+        sysTimer.Dispose();
     }
 }

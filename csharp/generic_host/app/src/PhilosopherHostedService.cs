@@ -5,13 +5,13 @@ using strategy;
 
 namespace app;
 
-public sealed class PhilosopherHostedService : BackgroundService
+public sealed class PhilosopherHostedService : BackgroundService, IPhilosopher
 {
     private readonly string name;
     private readonly int index;
     private readonly ForkState left;
     private readonly ForkState right;
-    private readonly Strategy strategy;
+    private readonly IPhilosopherStrategy strategy;
     private readonly PhilosopherState state;
     private readonly SimulationOptions options;
     private readonly ILogger<PhilosopherHostedService> logger;
@@ -21,7 +21,7 @@ public sealed class PhilosopherHostedService : BackgroundService
         string name,
         int index,
         ITableManager tableManager,
-        Strategy strategy,
+        IPhilosopherStrategy strategy,
         IPhilosopherRegistry registry,
         IOptions<SimulationOptions> options,
         ILogger<PhilosopherHostedService> logger)
@@ -136,5 +136,13 @@ public sealed class PhilosopherHostedService : BackgroundService
             // ignore, cooperative cancellation
         }
     }
+
+    public string GetName() => name;
+    public int Index => index;
+    public strategy.PhilosopherStage GetState() => state.Stage;
+    public IPhilosopherStrategy Strategy => strategy;
+    public IFork Left => left;
+    public IFork Right => right;
+    public string GetAction() => state.Action;
 }
 

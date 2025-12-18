@@ -10,7 +10,7 @@ public interface IMetricsCollector
     void Print(TimeSpan elapsed);
 }
 
-public sealed class MetricsCollector : IMetricsCollector
+public class MetricsCollector : IMetricsCollector
 {
     private readonly IPhilosopherRegistry registry;
     private readonly ITableManager tableManager;

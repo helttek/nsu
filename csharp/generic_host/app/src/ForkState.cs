@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Threading;
+using strategy;
 
 namespace app;
 
@@ -9,7 +10,7 @@ public enum ForkStatus
     InUse
 }
 
-public sealed class ForkState
+public class ForkState : IFork
 {
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly object sync = new();
@@ -27,6 +28,8 @@ public sealed class ForkState
     }
 
     public int Id { get; }
+
+    public string? UsedBy() { lock(sync) return usedBy; }
 
     public ForkSnapshot GetSnapshot()
     {

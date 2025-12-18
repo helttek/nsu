@@ -6,7 +6,7 @@ public interface ITableManager
     IReadOnlyList<ForkState> Forks { get; }
 }
 
-public sealed class TableManager : ITableManager
+public class TableManager : ITableManager
 {
     private readonly ForkState[] forks;
 

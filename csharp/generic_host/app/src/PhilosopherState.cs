@@ -1,13 +1,8 @@
+using strategy;
+
 namespace app;
 
-public enum PhilosopherStage
-{
-    Thinking,
-    Hungry,
-    Eating
-}
-
-public sealed class PhilosopherState
+public class PhilosopherState
 {
     private readonly object sync = new();
     private DateTime? hungrySince;
@@ -22,7 +17,7 @@ public sealed class PhilosopherState
     public string Name { get; }
     public int Index { get; }
 
-    public PhilosopherStage Stage { get; private set; } = PhilosopherStage.Thinking;
+    public strategy.PhilosopherStage Stage { get; private set; } = strategy.PhilosopherStage.Thinking;
     public string Action { get; private set; } = "Thinking";
     public int Meals { get; private set; }
 
@@ -30,7 +25,7 @@ public sealed class PhilosopherState
     {
         lock (sync)
         {
-            Stage = PhilosopherStage.Thinking;
+            Stage = strategy.PhilosopherStage.Thinking;
             Action = msLeft > 0 ? $"Thinking ({msLeft} ms left)" : "Thinking";
         }
     }
@@ -39,11 +34,11 @@ public sealed class PhilosopherState
     {
         lock (sync)
         {
-            if (Stage != PhilosopherStage.Hungry)
+            if (Stage != strategy.PhilosopherStage.Hungry)
             {
                 hungrySince = DateTime.UtcNow;
             }
-            Stage = PhilosopherStage.Hungry;
+            Stage = strategy.PhilosopherStage.Hungry;
             Action = action;
         }
     }
@@ -66,7 +61,7 @@ public sealed class PhilosopherState
                 hungrySince = null;
             }
 
-            Stage = PhilosopherStage.Eating;
+            Stage = strategy.PhilosopherStage.Eating;
             Action = $"Eating ({msLeft} ms left)";
         }
     }
@@ -84,7 +79,7 @@ public sealed class PhilosopherState
         lock (sync)
         {
             TimeSpan totalHungry = hungryTotal;
-            if (Stage == PhilosopherStage.Hungry && hungrySince.HasValue)
+            if (Stage == strategy.PhilosopherStage.Hungry && hungrySince.HasValue)
             {
                 totalHungry += DateTime.UtcNow - hungrySince.Value;
             }
