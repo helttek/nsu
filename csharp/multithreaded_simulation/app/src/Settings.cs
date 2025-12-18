@@ -11,6 +11,7 @@ class Settings
     public int? ThinkMaxMs { get; set; }
     public int? EatMinMs { get; set; }
     public int? EatMaxMs { get; set; }
+    public int? DeadlockDetectionIntervalMs { get; set; } = 200;
 
     private const int DEFAULT_SIM_DURATION_MS = 10000;
     private const int DEFAULT_STATUS_INTERVAL_MS = 150;

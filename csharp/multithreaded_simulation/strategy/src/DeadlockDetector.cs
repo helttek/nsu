@@ -7,83 +7,76 @@ namespace strategy
 {
     public class DeadlockDetector : IDisposable
     {
-        private readonly IReadOnlyList<Fork> forks;
-        private readonly Timer timer;
+        private readonly Dictionary<string, Philosopher> _philosophers;
+        private readonly Timer _timer;
 
         public event Action<List<string>>? OnDeadlockDetected;
 
-        public DeadlockDetector(IReadOnlyList<Fork> forks, TimeSpan pollInterval)
+        public DeadlockDetector(IEnumerable<Philosopher> philosophers, TimeSpan pollInterval)
         {
-            this.forks = forks;
-            timer = new Timer(_ => Check(), null, pollInterval, pollInterval);
+            _philosophers = philosophers.ToDictionary(p => p.GetName());
+            _timer = new Timer(_ => Check(), null, pollInterval, pollInterval);
         }
 
         private void Check()
         {
-            string? Resolver(int forkId)
+            foreach (var p in _philosophers.Values)
             {
-                var fork = forks.FirstOrDefault(f => f.Id == forkId);
-                var owner = fork?.UsedBy();
-                if (string.IsNullOrEmpty(owner)) return null;
-                return owner;
-            }
+                if (p.GetState() != Philosopher.State.HUNGRY) continue;
 
-            var graph = LockTracker.BuildWaitForGraph(Resolver);
-            var cycle = FindCycle(graph);
-            if (cycle != null && cycle.Count > 0)
-            {
-                OnDeadlockDetected?.Invoke(cycle);
-            }
-        }
+                var visited = new HashSet<string>();
+                var current = p;
+                var path = new List<string>();
 
-        private static List<string>? FindCycle(Dictionary<string, List<string>> graph)
-        {
-            var visited = new HashSet<string>(StringComparer.Ordinal);
-            var stack = new HashSet<string>(StringComparer.Ordinal);
-            var parent = new Dictionary<string, string>(StringComparer.Ordinal);
-
-            foreach (var node in graph.Keys)
-            {
-                if (Dfs(node)) return ExtractCycle(node);
-            }
-
-            return null;
-
-            bool Dfs(string v)
-            {
-                if (stack.Contains(v)) return true;
-                if (visited.Contains(v)) return false;
-                visited.Add(v);
-                stack.Add(v);
-                if (graph.TryGetValue(v, out var edges))
+                while (current != null)
                 {
-                    foreach (var w in edges)
+                    if (visited.Contains(current.GetName()))
                     {
-                        if (!parent.ContainsKey(w)) parent[w] = v;
-                        if (Dfs(w)) return true;
+                        path.Add(current.GetName());
+                        OnDeadlockDetected?.Invoke(path);
+                        return;
                     }
-                }
-                stack.Remove(v);
-                return false;
-            }
 
-            List<string>? ExtractCycle(string start)
-            {
-                var cycle = new List<string>();
-                var cur = start;
-                var seen = new HashSet<string>(StringComparer.Ordinal);
-                while (!seen.Contains(cur))
-                {
-                    seen.Add(cur);
-                    cycle.Add(cur);
-                    if (!parent.TryGetValue(cur, out cur)) break;
-                }
-                cycle.Reverse();
-                return cycle;
-            }
+                    visited.Add(current.GetName());
+                    path.Add(current.GetName());
 
+                    if (current.GetState() != Philosopher.State.HUNGRY)
+                    {
+                        break;
+                    }
+
+                    bool leftFirst = current.Strategy.TakeWhichFork(current.Index);
+                    var first = leftFirst ? current.Left : current.Right;
+                    var second = leftFirst ? current.Right : current.Left;
+
+                    Fork wantedFork;
+
+                    if (first.UsedBy() == current.GetName())
+                    {
+                        wantedFork = second;
+                    }
+                    else
+                    {
+                        wantedFork = first;
+                    }
+
+                    string ownerName = wantedFork.UsedBy();
+
+                    if (string.IsNullOrEmpty(ownerName))
+                    {
+                        break;
+                    }
+
+                    if (!_philosophers.TryGetValue(ownerName, out var owner))
+                    {
+                        break;
+                    }
+
+                    current = owner;
+                }
+            }
         }
 
-        public void Dispose() => timer.Dispose();
+        public void Dispose() => _timer.Dispose();
     }
 }

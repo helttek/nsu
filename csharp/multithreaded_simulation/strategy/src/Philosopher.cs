@@ -31,6 +31,10 @@ public class Philosopher
     private int eaten;
     private DateTime? hungerStart;
     private TimeSpan totalHungry;
+    public Fork Left => left;
+    public Fork Right => right;
+    public Strategy Strategy => strategy;
+    public int Index => index;
 
     public Philosopher(string name, int index, Fork left, Fork right, Strategy strategy, CancellationToken token,
         int forkAcquireMs, int thinkMinMs, int thinkMaxMs, int eatMinMs, int eatMaxMs)
@@ -129,28 +133,26 @@ public class Philosopher
 
     private void TryAcquireForks()
     {
-        bool leftFirst = strategy.TakeLeftFirst(index);
+        bool leftFirst = strategy.TakeWhichFork(index);
         Fork first = leftFirst ? left : right;
         Fork second = leftFirst ? right : left;
 
-        if (!TakeFork(first, leftFirst ? "TakeLeftFork" : "TakeRightFork"))
+        bool gotFirst = TakeFork(first, leftFirst ? "TakeLeftFork" : "TakeRightFork");
+        if (!gotFirst)
         {
-            // livelock reduction
             Backoff();
             return;
         }
 
-        if (!TakeFork(second, leftFirst ? "TakeRightFork" : "TakeLeftFork"))
+        bool gotSecond = TakeFork(second, leftFirst ? "TakeRightFork" : "TakeLeftFork");
+        if (!gotSecond)
         {
-            // Failed to get second fork, release the first immediately.
             first.Release(name);
             SetAction("ReleaseFork");
-            // livelock reduction
             Backoff();
             return;
         }
 
-        // Successfully got both forks; transition to eating.
         lock (sync)
         {
             if (hungerStart.HasValue)

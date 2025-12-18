@@ -6,7 +6,7 @@ public class AlwaysRightStrategy : Strategy
     {
     }
 
-    public override bool TakeLeftFirst(int philosopherIndex)
+    public override bool TakeWhichFork(int philosopherIndex)
     {
         // Always take the right fork first (left goes second).
         return false;
