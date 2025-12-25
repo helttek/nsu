@@ -45,19 +45,27 @@ namespace strategy
                         break;
                     }
 
-                    bool leftFirst = current.Strategy.TakeWhichFork(current.Index);
-                    var first = leftFirst ? current.Left : current.Right;
-                    var second = leftFirst ? current.Right : current.Left;
+                    bool leftFirst = current.Strategy.TakesLeftFirst(current.Index);
+                    var firstFork = leftFirst ? current.Left : current.Right;
+                    var secondFork = leftFirst ? current.Right : current.Left;
+
+                    string firstOwner = firstFork.UsedBy();
+                    string secondOwner = secondFork.UsedBy();
+                    string currentName = current.GetName();
 
                     Fork wantedFork;
 
-                    if (first.UsedBy() == current.GetName())
+                    if (firstOwner != currentName)
                     {
-                        wantedFork = second;
+                        wantedFork = firstFork;
+                    }
+                    else if (secondOwner != currentName)
+                    {
+                        wantedFork = secondFork;
                     }
                     else
                     {
-                        wantedFork = first;
+                        break;
                     }
 
                     string ownerName = wantedFork.UsedBy();

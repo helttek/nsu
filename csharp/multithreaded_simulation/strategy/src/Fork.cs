@@ -33,56 +33,58 @@ public class Fork
 
     public string GetState()
     {
-        lock (sync)
-        {
-            return state.ToString();
-        }
+        lock (sync) return state.ToString();
     }
 
     public string UsedBy()
     {
-        lock (sync)
-        {
-            return usedBy ?? "";
-        }
+        lock (sync) return usedBy ?? "";
     }
 
-    public bool TryTake(string philosopherName, int acquisitionDelayMs, CancellationToken token)
+    public void Acquire(string philosopherName, int acquisitionDelayMs, CancellationToken token)
     {
-        if (!Monitor.TryEnter(sync))
+        bool acquired = false;
+        while (!acquired)
         {
-            return false;
+            token.ThrowIfCancellationRequested();
+
+            lock (sync)
+            {
+                if (state == State.AVAILABLE)
+                {
+                    state = State.IN_USE;
+                    usedBy = philosopherName;
+                    UpdateDurations(State.IN_USE);
+                    acquired = true;
+                }
+            }
+
+            if (!acquired)
+            {
+                Thread.Sleep(10);
+            }
         }
 
         try
         {
-            if (state != State.AVAILABLE)
-            {
-                return false;
-            }
-
-            UpdateDurations(State.IN_USE);
-            usedBy = philosopherName;
-            state = State.IN_USE;
+            SleepWithCancellation(acquisitionDelayMs, token);
         }
-        finally
+        catch (OperationCanceledException)
         {
-            Monitor.Exit(sync);
+            Release(philosopherName);
+            throw;
         }
-
-        SleepWithCancellation(acquisitionDelayMs, token);
-        return !token.IsCancellationRequested;
     }
 
     public void Release(string philosopherName)
     {
         lock (sync)
         {
-            if (state == State.IN_USE && usedBy == philosopherName)
+            if (usedBy == philosopherName)
             {
-                UpdateDurations(State.AVAILABLE);
-                state = State.AVAILABLE;
                 usedBy = null;
+                UpdateDurations(State.AVAILABLE);
+                Monitor.PulseAll(sync);
             }
         }
     }
@@ -93,12 +95,11 @@ public class Fork
         {
             UpdateDurations(state);
             var total = availableTime + inUseTime;
-            if (totalElapsed > total)
-            {
-                total = totalElapsed;
-            }
-            double availablePct = total.TotalMilliseconds > 0 ? availableTime.TotalMilliseconds / total.TotalMilliseconds * 100.0 : 0.0;
-            double inUsePct = total.TotalMilliseconds > 0 ? inUseTime.TotalMilliseconds / total.TotalMilliseconds * 100.0 : 0.0;
+            if (totalElapsed > total) total = totalElapsed;
+
+            double totalMs = total.TotalMilliseconds;
+            double availablePct = totalMs > 0 ? availableTime.TotalMilliseconds / totalMs * 100.0 : 0.0;
+            double inUsePct = totalMs > 0 ? inUseTime.TotalMilliseconds / totalMs * 100.0 : 0.0;
             return (availablePct, inUsePct);
         }
     }
@@ -107,24 +108,19 @@ public class Fork
     {
         var now = DateTime.UtcNow;
         var delta = now - lastStateChange;
-        if (state == State.AVAILABLE)
-        {
-            availableTime += delta;
-        }
-        else
-        {
-            inUseTime += delta;
-        }
+        if (state == State.AVAILABLE) availableTime += delta;
+        else if (state == State.IN_USE) inUseTime += delta;
         lastStateChange = now;
         state = nextState;
     }
 
     private static void SleepWithCancellation(int ms, CancellationToken token)
     {
-        const int slice = 5;
+        const int slice = 10;
         int waited = 0;
-        while (waited < ms && !token.IsCancellationRequested)
+        while (waited < ms)
         {
+            token.ThrowIfCancellationRequested();
             int portion = Math.Min(slice, ms - waited);
             Thread.Sleep(portion);
             waited += portion;

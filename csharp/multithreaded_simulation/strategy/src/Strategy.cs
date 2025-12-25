@@ -1,9 +1,16 @@
-﻿namespace strategy;
+﻿using System.Threading;
+
+namespace strategy;
 
 public abstract class Strategy
 {
-    protected Strategy() { }
+    public abstract void AcquireForks(Philosopher p, CancellationToken token);
 
-    // Returns true if the philosopher should attempt the left fork first.
-    public abstract bool TakeWhichFork(int philosopherIndex);
+    public virtual void ReleaseForks(Philosopher p)
+    {
+        p.Left.Release(p.GetName());
+        p.Right.Release(p.GetName());
+    }
+
+    public abstract bool TakesLeftFirst(int philosopherIndex);
 }
