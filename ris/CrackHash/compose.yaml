@@ -1,0 +1,13 @@
+name: CrackHash
+include:
+  - ./manager-service/compose.yaml
+  - ./worker-service/compose.yaml
+
+services:
+  manager-service:
+    ports:
+      - "8080:8080"
+  worker-service:
+    ports:
+      - "8081:8081"
+        
