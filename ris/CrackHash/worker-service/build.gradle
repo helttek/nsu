@@ -1,10 +1,11 @@
 plugins {
     id("org.springframework.boot") version("4.0.3")
     id("java")
+    id("com.github.bjornvester.xjc") version "1.9.0"
 }
 
 version = '1.0.0'
-group = 'org.crackhash.worker-service'
+group = 'org.crackhash'
 
 java {
     toolchain {
@@ -21,6 +22,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter")
 
+    implementation('org.springframework.boot:spring-boot-starter-web')
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -32,4 +35,9 @@ tasks.named('test', Test) {
 
 jar {
     enabled = false
+}
+
+xjc {
+    xsdDir.set(layout.projectDirectory.dir("src/main/resources"))
+    defaultPackage.set("org.crackhash.model.responses")
 }
