@@ -16,7 +16,7 @@ public class RestClientConfig {
     @Bean
     public RestClient config(RestClient.Builder builder) {
         return RestClient.builder()
-                .baseUrl("http://localhost:8080")
+                .baseUrl("http://manager-service:8080")
                 .defaultHeader("Accept", MediaType.APPLICATION_XML_VALUE)
                 .build();
     }

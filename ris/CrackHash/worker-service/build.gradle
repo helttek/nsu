@@ -26,6 +26,12 @@ dependencies {
 
     implementation('org.springframework.boot:spring-boot-starter-restclient')
 
+    implementation("tools.jackson.module:jackson-module-jaxb-annotations:3.1.0")
+
+    implementation("com.github.dpaukov:combinatoricslib3:3.4.0")
+
+    implementation("commons-codec:commons-codec:1.21.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
