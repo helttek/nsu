@@ -26,6 +26,7 @@ public class TaskCompletionService {
         List<String> alphabet = dto.getAlphabet().getSymbols();
         int maxLength = dto.getMaxLength();
 
+        log.info("====================================================");
         range.calculate(dto.getPartNumber(), dto.getPartCount(), maxLength, alphabet.size());
 
         long rangeCount = range.start;
@@ -38,18 +39,19 @@ public class TaskCompletionService {
             Iterable<List<String>> generator = Generator.permutation(alphabet)
                     .withRepetitions(hashLength);
 
+            //TODO: fix, when different workers share a generator with the same hashLength
             for (List<String> combination : generator) {
-                log.info("range count: {}", rangeCount);
+//                log.info("range count: {}", rangeCount);
                 if (rangeCount > range.end) {
                     break;
                 }
                 rangeCount++;
 
-                log.info("Combination: {}", combination);
                 String candidate = String.join("", combination);
-                log.info("Processing word: {}", candidate);
+//                log.info("Processing word: {}", candidate);
 
                 if (DigestUtils.md5Hex(candidate).equals(hash)) {
+                    log.info("Range: {}", rangeCount);
                     log.info("Found word with a matching hash: {}", candidate);
                     return;
                 }
@@ -67,6 +69,8 @@ public class TaskCompletionService {
         private long count;
         private int startingLength;
         private int endingLength;
+        private long iterationStart;
+        private long iterationEnd;
 
         private void calculate(int workerNumber, int workerCount, int hashMaxLength, int alphabetSize) {
             long count = 0;
@@ -78,22 +82,37 @@ public class TaskCompletionService {
             this.count = end - start;
 
             long t = 0;
-            for (int hashLength = 1; hashLength <= hashMaxLength; hashLength++) {
-                if (t <= start) {
-                    startingLength = hashLength;
-                    break;
+            if (t >= start) {
+                startingLength = 1;
+            } else {
+                for (int hashLength = 1; hashLength <= hashMaxLength; hashLength++) {
+                    t += (long) Math.pow(alphabetSize, hashLength);
+                    log.info("LOLOLOLOLOLOLOLOLOL");
+                    log.info("t: {}", t);
+                    log.info("start: {}", start);
+                    if (t >= start) {
+                        startingLength = hashLength;
+                        iterationStart = start - 1;
+                        break;
+                    }
                 }
-                t += (long) Math.pow(alphabetSize, hashLength);
             }
             t = 0;
+            endingLength = 0;
             for (int hashLength = 1; hashLength <= hashMaxLength; hashLength++) {
-                //TODO: fix endingLength calculation, check startingLength as well
-                if (t > end) {
-                    endingLength = Math.max(hashLength - 1, 1);
+                t += (long) Math.pow(alphabetSize, hashLength);
+                log.info("HAHHHHHAHAHHAHH");
+                log.info("t: {}", t);
+                log.info("end: {}", end);
+                if (t >= end) {
+                    endingLength = Math.max(hashLength, 1);
                     break;
                 }
-                t += (long) Math.pow(alphabetSize, hashLength);
             }
+        }
+
+        private end calculateIterationBounds() {
+
         }
     }
 }
