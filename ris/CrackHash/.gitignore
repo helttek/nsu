@@ -1,5 +1,6 @@
 .idea
 .gradle
+.vscode
 build
 manager-service/build
 worker-service/build
