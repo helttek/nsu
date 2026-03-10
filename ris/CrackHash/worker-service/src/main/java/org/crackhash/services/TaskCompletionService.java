@@ -17,7 +17,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class TaskCompletionService {
-    private final RestClient restClient;
+
     private final Range range;
     private final TaskResponseSenderService taskResponseSenderService;
 
@@ -30,7 +30,7 @@ public class TaskCompletionService {
 
         List<String> matchingWords = findMatches(alphabet, hash);
 
-        taskResponseSenderService.send(matchingWords);
+        taskResponseSenderService.send(matchingWords, dto.getRequestId(), dto.getPartNumber());
     }
 
     private List<String> findMatches(List<String> alphabet, String hash) {

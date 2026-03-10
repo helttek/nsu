@@ -3,6 +3,7 @@ package org.crackhash.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,8 @@ public class RestClientConfig {
     @Bean
     public RestClient config(RestClient.Builder builder) {
         return RestClient.builder()
-                .baseUrl("http://manager-service:8080")
-                .defaultHeader("Accept", MediaType.APPLICATION_XML_VALUE)
+                .baseUrl("http://localhost:8080")
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
                 .build();
     }
 }

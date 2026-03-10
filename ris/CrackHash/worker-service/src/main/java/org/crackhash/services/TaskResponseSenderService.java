@@ -1,12 +1,27 @@
 package org.crackhash.services;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.crackhash.model.requests.CrackHashWorkerResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
+@Slf4j
 public class TaskResponseSenderService {
-    public void send(List<String> matchingWords) {
+    private final RestClient restClient;
 
+    public void send(List<String> matchingWords, String requestId, int partNumber) {
+        CrackHashWorkerResponse requestBody = new CrackHashWorkerResponse();
+        requestBody.setRequestId(requestId);
+        requestBody.setPartNumber(partNumber);
+        var answers = new CrackHashWorkerResponse.Answers();
+        answers.getWords().addAll(matchingWords);
+        requestBody.setAnswers(answers);
+        var response = restClient.patch().uri("/").body(requestBody).retrieve().toBodilessEntity();
+        log.info("Response was: {}", response.getStatusCode());
     }
 }

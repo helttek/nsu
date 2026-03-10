@@ -5,3 +5,4 @@ build
 manager-service/build
 worker-service/build
 CrackHash.iml
+server.py
