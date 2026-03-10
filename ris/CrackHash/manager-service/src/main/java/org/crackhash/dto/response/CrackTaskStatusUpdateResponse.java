@@ -2,14 +2,14 @@ package org.crackhash.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.crackhash.dto.response.util.CrackUpdateStatusEnum;
+import org.crackhash.util.CrackTaskStatusEnum;
 
 import java.util.List;
 
 @Getter
 @Setter
-public class CrackStatusUpdateResponse {
-    CrackUpdateStatusEnum status;
+public class CrackTaskStatusUpdateResponse {
+    CrackTaskStatusEnum status;
 
     List<String> data;
 }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CrackRequest {
+public class CrackTaskCreationRequest {
     private String hash;
 
     private int maxLength;
