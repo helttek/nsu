@@ -2,9 +2,11 @@ services:
   worker-service:
     build:
       context: .
-#      target: final
-    ports:
-       - "8081:8081"
+    #      target: final
+    env_file:
+      - .env
+    expose:
+      - "${WORKER_SERVICE_INTERNAL_PORT}"
 
     # The commented out section below is an example of how to define a PostgreSQL
     # database that your application can use. `depends_on` tells Docker Compose to

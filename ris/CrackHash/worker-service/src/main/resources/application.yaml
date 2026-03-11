@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${WORKER_SERVICE_INTERNAL_PORT}
 spring:
   jackson:
     property-naming-strategy: UPPER_CAMEL_CASE

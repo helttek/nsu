@@ -2,9 +2,11 @@ services:
   manager-service:
     build:
       context: .
-#      target: final
+    #      target: final
+    env_file:
+      - .env
     ports:
-       - "8080:8080"
+      - "${MANAGER_SERVICE_EXTERNAL_PORT}:${MANAGER_SERVICE_INTERNAL_PORT}"
 
     # The commented out section below is an example of how to define a PostgreSQL
     # database that your application can use. `depends_on` tells Docker Compose to
