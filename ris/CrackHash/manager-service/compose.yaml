@@ -5,6 +5,7 @@ services:
     #      target: final
     env_file:
       - .env
+      - ../.env
     ports:
       - "${MANAGER_SERVICE_EXTERNAL_PORT}:${MANAGER_SERVICE_INTERNAL_PORT}"
     volumes:

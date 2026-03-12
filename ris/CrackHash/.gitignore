@@ -4,3 +4,4 @@
 build
 CrackHash.iml
 server.py
+.env

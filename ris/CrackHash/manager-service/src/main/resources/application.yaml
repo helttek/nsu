@@ -16,3 +16,7 @@ task:
 mongodb:
   collection:
     name: "${MONGO_INITDB_DATABASE}"
+
+app:
+  worker:
+    count: "${WORKER_SERVICE_COUNT}"

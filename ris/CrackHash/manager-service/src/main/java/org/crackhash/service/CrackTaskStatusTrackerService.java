@@ -41,8 +41,8 @@ public class CrackTaskStatusTrackerService {
         this.TIMEOUT = Duration.ofMinutes(TASK_TIMEOUT_DURATION_MINUTES);
     }
 
-    //TODO: how to count workers
-    private final int workerCount = 1;
+    @Value("${app.worker.count}")
+    private int workerCount;
 
     public String createTask() {
         return repository.save(new CrackTaskDocument(
