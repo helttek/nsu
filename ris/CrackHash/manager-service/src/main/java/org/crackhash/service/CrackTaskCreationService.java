@@ -13,7 +13,7 @@ public class CrackTaskCreationService {
     private final CrackTaskStatusTrackerService crackTaskStatusTrackerService;
 
     public CrackTaskCreationResponse handleCrackRequest() {
-        String requestId = UUID.randomUUID().toString();
+        String requestId = crackTaskStatusTrackerService.createTask();
         CrackTaskCreationResponse request = new CrackTaskCreationResponse();
         request.setRequestId(requestId);
         return request;
