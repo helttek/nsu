@@ -17,8 +17,8 @@ public class UserRequestController {
     private final CrackTaskStatusUpdateService crackTaskStatusUpdateService;
 
     @PostMapping(value = "/crack", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public CrackTaskCreationResponse handleCrackRequest(CrackTaskCreationRequest dto) {
-        return crackTaskCreationService.handleCrackRequest();
+    public CrackTaskCreationResponse handleCrackRequest(@RequestBody CrackTaskCreationRequest dto) {
+        return crackTaskCreationService.handleCrackRequest(dto);
     }
 
     @GetMapping(value = "/status", consumes = MediaType.APPLICATION_JSON_VALUE)

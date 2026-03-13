@@ -1,7 +1,12 @@
 server:
   port: ${WORKER_SERVICE_INTERNAL_PORT}
+
 spring:
   jackson:
     property-naming-strategy: UPPER_CAMEL_CASE
     mapper:
       accept-case-insensitive-properties: true
+
+app:
+  manager:
+    port: "${MANAGER_SERVICE_INTERNAL_PORT}"
