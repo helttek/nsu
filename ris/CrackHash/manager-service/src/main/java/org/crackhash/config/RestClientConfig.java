@@ -13,7 +13,7 @@ public class RestClientConfig {
     @Bean
     public RestClient config(RestClient.Builder builder) {
         return RestClient.builder()
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 }

@@ -1,6 +1,7 @@
 package org.crackhash.controllers;
 
 import lombok.AllArgsConstructor;
+import org.crackhash.model.responses.CrackHashWorkerResponse;
 import org.crackhash.service.TaskResultHandlerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +16,7 @@ public class WorkerRequestController {
 
     @PatchMapping(value = "/hash/crack/request", consumes = MediaType.APPLICATION_XML_VALUE)
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void updateQueue() {
-        taskResultHandlerService.handle();
+    public void updateQueue(@RequestBody CrackHashWorkerResponse dto) {
+        taskResultHandlerService.handle(dto);
     }
 }

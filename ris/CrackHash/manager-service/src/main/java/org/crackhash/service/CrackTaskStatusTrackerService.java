@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +28,7 @@ public class CrackTaskStatusTrackerService {
 
     @Value("${task.timeout.duration.minutes}")
     private long TASK_TIMEOUT_DURATION_MINUTES;
-    private Duration TIMEOUT = Duration.ofHours(TASK_TIMEOUT_DURATION_MINUTES);
+    private Duration TIMEOUT;
 
     private final CrackTasksRepository repository;
     private final MongoTemplate mongoTemplate;
@@ -48,7 +50,8 @@ public class CrackTaskStatusTrackerService {
         return repository.save(new CrackTaskDocument(
                 IN_PROGRESS,
                 workerCount,
-                Instant.now().plus(TIMEOUT)
+                Instant.now().plus(TIMEOUT),
+                new ArrayList<>()
         )).getId();
     }
 
@@ -77,6 +80,12 @@ public class CrackTaskStatusTrackerService {
     public CrackTaskStatusEnum getStatus(String guid) throws NoSuchElementException {
         return repository.findById(guid)
                 .map(CrackTaskDocument::getStatus)
+                .orElseThrow();
+    }
+
+    public List<String> getMatches(String guid) {
+        return repository.findById(guid)
+                .map(CrackTaskDocument::getMatches)
                 .orElseThrow();
     }
 

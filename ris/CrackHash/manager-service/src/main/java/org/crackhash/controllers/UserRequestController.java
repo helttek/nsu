@@ -23,6 +23,6 @@ public class UserRequestController {
 
     @GetMapping(value = "/status", consumes = MediaType.APPLICATION_JSON_VALUE)
     public CrackTaskStatusUpdateResponse handleCrackStatusUpdate(@RequestParam String requestId) {
-        return crackTaskStatusUpdateService.handleCrackStatusUpdate();
+        return crackTaskStatusUpdateService.handleCrackStatusUpdate(requestId);
     }
 }
