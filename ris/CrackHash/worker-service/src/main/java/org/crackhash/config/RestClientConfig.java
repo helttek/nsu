@@ -1,23 +1,22 @@
 package org.crackhash.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
 @Configuration
+@Slf4j
 public class RestClientConfig {
+
 
     @Bean
     public RestClient config(RestClient.Builder builder) {
-        return RestClient.builder()
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+        return builder
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                    log.info("request: {}, response: {}", request, response);
+                })
                 .build();
     }
 }

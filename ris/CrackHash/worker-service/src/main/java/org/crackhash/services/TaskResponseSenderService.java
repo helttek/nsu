@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.crackhash.model.requests.CrackHashWorkerResponse;
 import org.crackhash.services.util.UriHandlerService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -23,8 +24,12 @@ public class TaskResponseSenderService {
         var answers = new CrackHashWorkerResponse.Answers();
         answers.getWords().addAll(matchingWords);
         requestBody.setAnswers(answers);
-        //TODO: fix application-type issue
-        var response = restClient.patch().uri(uriHandlerService.getManagerTaskResultUri()).body(requestBody).retrieve().toBodilessEntity();
+        var response = restClient.patch()
+                .uri(uriHandlerService.getManagerTaskResultUri())
+                .contentType(MediaType.APPLICATION_XML)
+                .body(requestBody)
+                .retrieve()
+                .toBodilessEntity();
         log.info("Response was: {}", response.getStatusCode());
     }
 }

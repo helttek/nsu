@@ -32,6 +32,10 @@ dependencies {
 
     implementation("commons-codec:commons-codec:1.21.0")
 
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
+
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -41,8 +45,6 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
-
-    implementation('com.github.dpaukov:combinatoricslib3:3.4.0')
 }
 
 tasks.named('test', Test) {
