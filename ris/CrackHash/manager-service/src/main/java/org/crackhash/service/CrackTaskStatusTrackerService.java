@@ -1,7 +1,6 @@
 package org.crackhash.service;
 
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import org.crackhash.model.CrackTaskDocument;
 import org.crackhash.repository.CrackTasksRepository;
 import org.crackhash.util.CrackTaskStatusEnum;
@@ -19,7 +18,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.crackhash.util.CrackTaskStatusEnum.*;
 
@@ -27,8 +25,8 @@ import static org.crackhash.util.CrackTaskStatusEnum.*;
 public class CrackTaskStatusTrackerService {
 
     @Value("${task.timeout.duration.minutes}")
-    private long TASK_TIMEOUT_DURATION_MINUTES;
-    private Duration TIMEOUT;
+    private long taskTimeoutDurationMinutes;
+    private Duration timeoutInMinutes;
 
     private final CrackTasksRepository repository;
     private final MongoTemplate mongoTemplate;
@@ -40,7 +38,7 @@ public class CrackTaskStatusTrackerService {
 
     @PostConstruct
     private void init() {
-        this.TIMEOUT = Duration.ofMinutes(TASK_TIMEOUT_DURATION_MINUTES);
+        this.timeoutInMinutes = Duration.ofMinutes(taskTimeoutDurationMinutes);
     }
 
     @Value("${app.worker.count}")
@@ -50,7 +48,7 @@ public class CrackTaskStatusTrackerService {
         return repository.save(new CrackTaskDocument(
                 IN_PROGRESS,
                 workerCount,
-                Instant.now().plus(TIMEOUT),
+                Instant.now().plus(timeoutInMinutes),
                 new ArrayList<>()
         )).getId();
     }
@@ -94,21 +92,13 @@ public class CrackTaskStatusTrackerService {
                 .orElseThrow();
     }
 
-    public void markError(String guid) {
-        mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(guid).and("status").is(IN_PROGRESS)),
-                Update.update("status", ERROR),
-                CrackTaskDocument.class
-        );
-    }
-
-    //TODO: fix timeout
     @Scheduled(fixedDelay = 60_000)
     public void markTimedOutTasksAsError() {
         mongoTemplate.updateMulti(
                 Query.query(
                         Criteria.where("status").is(IN_PROGRESS)
-                                .and("createdAt").lt(Instant.now().minus(TIMEOUT))
+                                .and("createdAt")
+                                .lt(Instant.now().minus(timeoutInMinutes))
                 ),
                 Update.update("status", ERROR),
                 CrackTaskDocument.class
