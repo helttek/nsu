@@ -16,10 +16,14 @@ public class CrackTaskCreationService {
     private final CrackTaskSenderService crackTaskSenderService;
 
     public CrackTaskCreationResponse handleCrackRequest(CrackTaskCreationRequest dto) {
+        log.info("Received a request from client to crack hash \"{}\"", dto.getHash());
+
         String requestId = crackTaskStatusTrackerService.createTask();
         log.info("Created a task.");
+
         crackTaskSenderService.send(requestId, dto.getHash(), dto.getMaxLength());
-        log.info("Sent a task to worker.");
+        log.info("Sent task to workers.");
+
         CrackTaskCreationResponse request = new CrackTaskCreationResponse();
         request.setRequestId(requestId);
         return request;

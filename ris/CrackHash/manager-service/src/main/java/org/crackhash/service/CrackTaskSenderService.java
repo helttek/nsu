@@ -23,7 +23,6 @@ public class CrackTaskSenderService {
     }
 
     public void send(String requestId, String hash, int hashMaxLength) {
-        log.info("Starting to send the task to workers ({})", appProperties.getWorker().getCount());
         for (int i = 1; i <= appProperties.getWorker().getCount(); i++) {
             CrackHashManagerRequest request = new CrackHashManagerRequest();
 
@@ -36,9 +35,10 @@ public class CrackTaskSenderService {
             request.setMaxLength(hashMaxLength);
             request.setPartCount(appProperties.getWorker().getCount());
 
-            log.info("Sending to ");
-            var response = restClient.post().uri(uriHandlerService.getBaseUri(i) + uriHandlerService.getWORKER_TASK_URI()).body(request).retrieve().toBodilessEntity();
-            log.info("Response was: {}", response.getStatusCode());
+            restClient.post().uri(uriHandlerService.getBaseUri(i) + uriHandlerService.getWORKER_TASK_URI())
+                    .body(request)
+                    .retrieve()
+                    .toBodilessEntity();
         }
     }
 }

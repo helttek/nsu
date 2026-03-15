@@ -60,15 +60,19 @@ public class CrackTaskStatusTrackerService {
                 Criteria.where("_id").is(taskId)
                         .and("status").is(IN_PROGRESS)
         );
+
         Update update = new Update()
                 .inc("pendingWorkers", -1)
-                .addToSet("matches", matches.toArray());
+                .addToSet("matches")
+                .each(matches);
+
         CrackTaskDocument updated = mongoTemplate.findAndModify(
                 query,
                 update,
                 new FindAndModifyOptions().returnNew(true),
                 CrackTaskDocument.class
         );
+
         if (updated != null && updated.getPendingWorkers() <= 0) {
             mongoTemplate.updateFirst(
                     Query.query(Criteria.where("_id").is(taskId)),
@@ -98,6 +102,7 @@ public class CrackTaskStatusTrackerService {
         );
     }
 
+    //TODO: fix timeout
     @Scheduled(fixedDelay = 60_000)
     public void markTimedOutTasksAsError() {
         mongoTemplate.updateMulti(

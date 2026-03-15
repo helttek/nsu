@@ -19,11 +19,14 @@ public class TaskResponseSenderService {
 
     public void send(List<String> matchingWords, String requestId, int partNumber) {
         CrackHashWorkerResponse requestBody = new CrackHashWorkerResponse();
-        requestBody.setRequestId(requestId);
-        requestBody.setPartNumber(partNumber);
+
         var answers = new CrackHashWorkerResponse.Answers();
         answers.getWords().addAll(matchingWords);
+
         requestBody.setAnswers(answers);
+        requestBody.setRequestId(requestId);
+        requestBody.setPartNumber(partNumber);
+
         restClient.patch()
                 .uri(uriHandlerService.getManagerTaskResultUri())
                 .contentType(MediaType.APPLICATION_XML)

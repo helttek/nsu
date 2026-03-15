@@ -26,11 +26,15 @@ public class TaskCompletionService {
         String hash = dto.getHash();
         List<String> alphabet = dto.getAlphabet().getSymbols();
         int maxLength = dto.getMaxLength();
+        
         range.calculate(dto.getPartNumber(), dto.getPartCount(), maxLength, alphabet.size());
 
+        log.info("Starting to crack hash \"{}\"", hash);
         List<String> matchingWords = findMatches(alphabet, hash);
+        log.info("Finished cracking hash.");
 
         taskResponseSenderService.send(matchingWords, dto.getRequestId(), dto.getPartNumber());
+        log.info("Sent hash crack results to manager.");
     }
 
     private List<String> findMatches(List<String> alphabet, String hash) {
