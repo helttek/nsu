@@ -24,12 +24,11 @@ public class TaskResponseSenderService {
         var answers = new CrackHashWorkerResponse.Answers();
         answers.getWords().addAll(matchingWords);
         requestBody.setAnswers(answers);
-        var response = restClient.patch()
+        restClient.patch()
                 .uri(uriHandlerService.getManagerTaskResultUri())
                 .contentType(MediaType.APPLICATION_XML)
                 .body(requestBody)
                 .retrieve()
                 .toBodilessEntity();
-        log.info("Response was: {}", response.getStatusCode());
     }
 }

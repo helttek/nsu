@@ -55,19 +55,20 @@ public class CrackTaskStatusTrackerService {
         )).getId();
     }
 
-    public void onWorkerResponse(String taskId) {
+    public void onWorkerResponse(String taskId, List<String> matches) {
         Query query = Query.query(
                 Criteria.where("_id").is(taskId)
                         .and("status").is(IN_PROGRESS)
         );
-
+        Update update = new Update()
+                .inc("pendingWorkers", -1)
+                .addToSet("matches", matches.toArray());
         CrackTaskDocument updated = mongoTemplate.findAndModify(
                 query,
-                new Update().inc("pendingWorkers", -1),
+                update,
                 new FindAndModifyOptions().returnNew(true),
                 CrackTaskDocument.class
         );
-
         if (updated != null && updated.getPendingWorkers() <= 0) {
             mongoTemplate.updateFirst(
                     Query.query(Criteria.where("_id").is(taskId)),
