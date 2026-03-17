@@ -22,7 +22,11 @@ public class CrackTaskStatusUpdateService {
 
         CrackTaskStatusUpdateResponse response = new CrackTaskStatusUpdateResponse();
         response.setStatus(status);
-        response.setData(matches);
+        if (matches.isEmpty()) {
+            response.setData(null);
+        } else {
+            response.setData(matches);
+        }
 
         log.info("Responded task status to client.");
         return response;

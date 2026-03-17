@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -48,35 +49,30 @@ public class CrackTaskStatusTrackerService {
         return repository.save(new CrackTaskDocument(
                 IN_PROGRESS,
                 workerCount,
-                Instant.now().plus(timeoutInMinutes),
-                new ArrayList<>()
-        )).getId();
+                Instant.now(),
+                new ArrayList<>())).getId();
     }
 
     public void onWorkerResponse(String taskId, List<String> matches) {
         Query query = Query.query(
                 Criteria.where("_id").is(taskId)
-                        .and("status").is(IN_PROGRESS)
-        );
+                        .and("status").is(IN_PROGRESS));
 
         Update update = new Update()
                 .inc("pendingWorkers", -1)
-                .addToSet("matches")
-                .each(matches);
+                .addToSet("matches").each(matches);
 
         CrackTaskDocument updated = mongoTemplate.findAndModify(
                 query,
                 update,
                 new FindAndModifyOptions().returnNew(true),
-                CrackTaskDocument.class
-        );
+                CrackTaskDocument.class);
 
         if (updated != null && updated.getPendingWorkers() <= 0) {
             mongoTemplate.updateFirst(
                     Query.query(Criteria.where("_id").is(taskId)),
                     Update.update("status", READY),
-                    CrackTaskDocument.class
-            );
+                    CrackTaskDocument.class);
         }
     }
 
@@ -92,17 +88,16 @@ public class CrackTaskStatusTrackerService {
                 .orElseThrow();
     }
 
+    @Transactional
     @Scheduled(fixedDelay = 60_000)
     public void markTimedOutTasksAsError() {
         mongoTemplate.updateMulti(
                 Query.query(
                         Criteria.where("status").is(IN_PROGRESS)
                                 .and("createdAt")
-                                .lt(Instant.now().minus(timeoutInMinutes))
-                ),
+                                .lt(Instant.now().minus(timeoutInMinutes))),
                 Update.update("status", ERROR),
-                CrackTaskDocument.class
-        );
+                CrackTaskDocument.class);
     }
 
 }
