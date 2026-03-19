@@ -45,6 +45,12 @@ dependencies {
 
     testCompileOnly("org.projectlombok:lombok:1.18.42")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+
+    implementation 'org.springframework.boot:spring-boot-starter-amqp:4.0.3'
+
+    implementation 'org.springframework:spring-oxm'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
+    implementation 'org.glassfish.jaxb:jaxb-runtime'
 }
 
 tasks.named('test', Test) {

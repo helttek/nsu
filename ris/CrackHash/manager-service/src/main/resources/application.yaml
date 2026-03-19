@@ -18,6 +18,15 @@ mongodb:
     name: "${MONGO_INITDB_DATABASE}"
 
 app:
+  rabbitmq:
+    worker:
+      queue: "${RABBITMQ_WORKER_QUEUE}"
+      exchange: "${RABBITMQ_WORKER_EXCHANGE}"
+      routing-key: "${RABBITMQ_WORKER_ROUTING_KEY}"
+    manager:
+      queue: "${RABBITMQ_MANAGER_QUEUE}"
+      exchange: "${RABBITMQ_MANAGER_EXCHANGE}"
+      routing-key: "${RABBITMQ_MANAGER_ROUTING_KEY}"
   worker:
     count: "${WORKER_SERVICE_COUNT}"
     port: "${WORKER_SERVICE_INTERNAL_PORT}"
