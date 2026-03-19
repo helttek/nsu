@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+//TODO: add error handling
+
 @SpringBootApplication
 @EnableAsync
 public class Manager {

@@ -13,6 +13,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   mongodb:
     image: mongo:8.0
@@ -26,9 +28,10 @@ services:
       - mongo_data:/data/db
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 7s
+      timeout: 4s
+      retries: 3
 
 volumes:
   mongo_data:
+  rabbitmq_data:

@@ -13,3 +13,6 @@ services:
     deploy:
       mode: replicated
       replicas: ${WORKER_SERVICE_COUNT}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy

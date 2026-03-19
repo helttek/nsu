@@ -1,4 +1,20 @@
 name: CrackHash
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.2.5
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASSWORD}"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 9s
+      timeout: 7s
+      retries: 4
+
 include:
   - ./manager-service/compose.yaml
   - ./worker-service/compose.yaml
