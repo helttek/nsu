@@ -1,5 +1,6 @@
 package org.crackhash.config;
 
+import lombok.RequiredArgsConstructor;
 import org.crackhash.model.requests.CrackHashManagerRequest;
 import org.crackhash.model.requests.CrackHashWorkerResponse;
 import org.springframework.amqp.core.Binding;
@@ -15,54 +16,38 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @Configuration
+@RequiredArgsConstructor
 public class RabbitMQConfig {
-
-    @Value("${app.rabbitmq.worker.exchange}")
-    private String workerExchangeName;
-
-    @Value("${app.rabbitmq.worker.queue}")
-    private String workerQueueName;
-
-    @Value("${app.rabbitmq.worker.routing-key}")
-    private String workerRoutingKey;
-
-    @Value("${app.rabbitmq.manager.exchange}")
-    private String managerExchangeName;
-
-    @Value("${app.rabbitmq.manager.queue}")
-    private String managerQueueName;
-
-    @Value("${app.rabbitmq.manager.routing-key}")
-    private String managerRoutingKey;
+    private final AppProperties appProperties;
 
     @Bean
     public DirectExchange workerExchange() {
-        return new DirectExchange(workerExchangeName);
+        return new DirectExchange(appProperties.getRabbitmq().getWorker().getExchange());
     }
 
     @Bean
     public Queue workerQueue() {
-        return new Queue(workerQueueName, true);
+        return new Queue(appProperties.getRabbitmq().getWorker().getQueue(), true);
     }
 
     @Bean
     public Binding workerBinding(Queue workerQueue, DirectExchange workerExchange) {
-        return BindingBuilder.bind(workerQueue).to(workerExchange).with(workerRoutingKey);
+        return BindingBuilder.bind(workerQueue).to(workerExchange).with(appProperties.getRabbitmq().getWorker().getRoutingKey());
     }
 
     @Bean
     public DirectExchange managerExchange() {
-        return new DirectExchange(managerExchangeName);
+        return new DirectExchange(appProperties.getRabbitmq().getManager().getExchange());
     }
 
     @Bean
     public Queue managerQueue() {
-        return new Queue(managerQueueName, true);
+        return new Queue(appProperties.getRabbitmq().getManager().getQueue(), true);
     }
 
     @Bean
     public Binding managerBinding(Queue managerQueue, DirectExchange managerExchange) {
-        return BindingBuilder.bind(managerQueue).to(managerExchange).with(managerRoutingKey);
+        return BindingBuilder.bind(managerQueue).to(managerExchange).with(appProperties.getRabbitmq().getManager().getRoutingKey());
     }
 
     @Bean

@@ -2,7 +2,7 @@ name: CrackHash
 
 services:
   rabbitmq:
-    image: rabbitmq:4.2.5
+    image: rabbitmq:4.2.5-management
     container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
