@@ -14,6 +14,8 @@ services:
       interval: 9s
       timeout: 7s
       retries: 4
+    ports:
+      - "15672:15672"
 
 include:
   - ./manager-service/compose.yaml

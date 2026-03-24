@@ -1,6 +1,7 @@
 package org.crackhash.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.crackhash.model.CrackTaskDocument;
 import org.crackhash.repository.CrackTasksRepository;
 import org.crackhash.util.CrackTaskStatusEnum;
@@ -23,6 +24,7 @@ import java.util.NoSuchElementException;
 import static org.crackhash.util.CrackTaskStatusEnum.*;
 
 @Service
+@Slf4j
 public class CrackTaskStatusTrackerService {
 
     @Value("${task.timeout.duration.minutes}")
@@ -73,6 +75,7 @@ public class CrackTaskStatusTrackerService {
                     Query.query(Criteria.where("_id").is(taskId)),
                     Update.update("status", READY),
                     CrackTaskDocument.class);
+            log.info("Change task {} status to \"READY\".", taskId);
         }
     }
 

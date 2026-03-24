@@ -1,6 +1,7 @@
 package org.crackhash.services;
 
 import com.rabbitmq.client.Channel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.crackhash.config.AppProperties;
 import org.crackhash.model.requests.CrackHashManagerRequest;
@@ -16,12 +17,15 @@ import java.io.IOException;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class QueueHandlerService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
     private AppProperties appProperties;
+    private boolean status = false;
 
-    @RabbitListener(queues = "${app.rabbitmq.worker.queue}")
+    @RabbitListener(queues = "${app.rabbitmq.worker.queue}", ackMode = "MANUAL")
     public void processTask(CrackHashManagerRequest request, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
         try {
             log.info("Worker processing task (extracted task from queue): {}", request.getRequestId());
@@ -40,10 +44,17 @@ public class QueueHandlerService {
             );
 
             // 3. Acknowledge the task ONLY after successful processing and sending
-            channel.basicAck(tag, false);
+//            channel.basicAck(tag, false);
+            status = true;
 
         } catch (Exception e) {
             // If something goes wrong, reject the message and put it back in the queue for another worker
+            log.info("Failed to process task. Caught exception.");
+//            channel.basicNack(tag, false, true);
+        }
+        if (status) {
+            channel.basicAck(tag, false);
+        } else {
             channel.basicNack(tag, false, true);
         }
     }

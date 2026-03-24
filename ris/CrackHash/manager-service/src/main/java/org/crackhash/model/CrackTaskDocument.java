@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.util.List;
 
-@Document(collection = "#{@environment.getProperty('mongodb.collection.name')}")
+@Document(collection = "${MONGODB_COLLECTION_NAME}")
 @Getter
 public class CrackTaskDocument {
     @Id

@@ -2,15 +2,15 @@ package org.crackhash.config;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.crackhash.model.responses.CrackHashManagerRequest;
-import org.crackhash.model.responses.CrackHashWorkerResponse;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MarshallingMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -52,17 +52,14 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Jaxb2Marshaller xmlMarshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        // Tell JAXB which classes it needs to convert to/from XML
-        marshaller.setClassesToBeBound(CrackHashWorkerResponse.class, CrackHashManagerRequest.class);
-        return marshaller;
+    public MessageConverter xmlMarshaller() {
+        return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, Jaxb2Marshaller xmlMarshaller) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMarshaller) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(new MarshallingMessageConverter(xmlMarshaller));
+        template.setMessageConverter(jsonMarshaller);
         return template;
     }
 }

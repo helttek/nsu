@@ -1,16 +1,13 @@
 package org.crackhash.config;
 
 import lombok.RequiredArgsConstructor;
-import org.crackhash.model.requests.CrackHashManagerRequest;
-import org.crackhash.model.requests.CrackHashWorkerResponse;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MarshallingMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
@@ -51,17 +48,27 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Jaxb2Marshaller xmlMarshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        // Tell JAXB which classes it needs to convert to/from XML
-        marshaller.setClassesToBeBound(CrackHashWorkerResponse.class, CrackHashManagerRequest.class);
-        return marshaller;
+    public MessageConverter jsonMarshaller() {
+        return new JacksonJsonMessageConverter();
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, Jaxb2Marshaller xmlMarshaller) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(new MarshallingMessageConverter(xmlMarshaller));
+        template.setMessageConverter(jsonConverter);
         return template;
     }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            MessageConverter jsonMessageConverter) {
+        SimpleRabbitListenerContainerFactory factory =
+                new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(jsonMessageConverter);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        return factory;
+    }
+
 }

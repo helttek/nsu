@@ -6,6 +6,9 @@ spring:
     property-naming-strategy: UPPER_CAMEL_CASE
     mapper:
       accept-case-insensitive-properties: true
+  rabbitmq:
+    password: "${RABBITMQ_DEFAULT_PASSWORD}"
+    username: "${RABBITMQ_DEFAULT_USER}"
 
 app:
   rabbitmq:

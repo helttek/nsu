@@ -5,6 +5,7 @@ services:
     #      target: final
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: "${RABBITMQ_DEFAULT_USER}"
       SPRING_RABBITMQ_PASSWORD: "${RABBITMQ_DEFAULT_PASSWORD}"
       RABBITMQ_WORKER_QUEUE: "${RABBITMQ_WORKER_QUEUE}"
@@ -13,6 +14,7 @@ services:
       RABBITMQ_MANAGER_QUEUE: "${RABBITMQ_MANAGER_QUEUE}"
       RABBITMQ_MANAGER_EXCHANGE: "${RABBITMQ_MANAGER_EXCHANGE}"
       RABBITMQ_MANAGER_ROUTING_KEY: "${RABBITMQ_MANAGER_ROUTING_KEY}"
+      MONGODB_COLLECTION_NAME: CrackTasks
     env_file:
       - .env
       - ../.env
@@ -21,27 +23,90 @@ services:
     volumes:
       - .:/manager-service
     depends_on:
-      mongodb:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
 
-  mongodb:
+  mongodb1:
     image: mongo:8.0
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      #      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      #      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
-      - mongo_data:/data/db
+      - mongo1_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 7s
+      timeout: 4s
+      retries: 3
+    command: [ --bind_ip_all, --replSet, rs0 ]
+
+  mongodb2:
+    image: mongo:8.0
+    ports:
+      - "27018:27017"
+    environment:
+      #      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      #      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo2_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 7s
+      timeout: 4s
+      retries: 3
+    command: [ --bind_ip_all, --replSet, rs0 ]
+
+  mongodb3:
+    image: mongo:8.0
+    ports:
+      - "27019:27017"
+    environment:
+      #      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      #      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo3_data:/data/db
+    command: [ --bind_ip_all, --replSet, rs0 ]
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
       interval: 7s
       timeout: 4s
       retries: 3
 
+  mongo-init:
+    image: mongo:8.0
+    depends_on:
+      mongodb1:
+        condition: service_healthy
+      mongodb2:
+        condition: service_healthy
+      mongodb3:
+        condition: service_healthy
+    command: >
+      mongosh mongodb1:27017 --quiet --eval "
+      try {
+        rs.status();
+        print('Replica set rs0 already initialized');
+      } catch (e) {
+        rs.initiate({
+          _id: 'rs0',
+          members: [
+            { _id: 0, host: 'mongodb1:27017', priority: 2 },
+            { _id: 1, host: 'mongodb2:27017', priority: 1 },
+            { _id: 2, host: 'mongodb3:27017', priority: 1 }
+          ]
+        });
+      }
+      "
+
 volumes:
-  mongo_data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
   rabbitmq_data:
