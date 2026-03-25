@@ -23,6 +23,9 @@ public class MongoConfig {
     @Value(value = "${spring.mongodb.uri}")
     private String uri;
 
+    @Value(value = "${mongodb.name}")
+    private String DB_NAME;
+
     @Bean
     public MongoClient mongoClient() {
         ConnectionString connStr = new ConnectionString(uri);
@@ -42,7 +45,7 @@ public class MongoConfig {
 
     @Bean
     public MongoDatabaseFactory mongoDatabaseFactory(MongoClient mongoClient) {
-        return new SimpleMongoClientDatabaseFactory(mongoClient, "your_db_name");
+        return new SimpleMongoClientDatabaseFactory(mongoClient, DB_NAME);
     }
 
     @Bean

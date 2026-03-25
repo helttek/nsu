@@ -1,9 +1,13 @@
 package org.crackhash.service;
 
+import com.sun.source.doctree.SeeTree;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.crackhash.model.CrackTaskDocument;
-import org.crackhash.repository.CrackTasksRepository;
+import org.crackhash.model.CracksDocument;
+import org.crackhash.model.TasksDocument;
+import org.crackhash.repository.CracksRepository;
+import org.crackhash.repository.TasksRepository;
 import org.crackhash.util.CrackTaskStatusEnum;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -20,24 +24,22 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 import static org.crackhash.util.CrackTaskStatusEnum.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CrackTaskStatusTrackerService {
 
     @Value("${task.timeout.duration.minutes}")
     private long taskTimeoutDurationMinutes;
     private Duration timeoutInMinutes;
 
-    private final CrackTasksRepository repository;
+    private final CracksRepository cracksRepository;
+    private final TasksRepository tasksRepository;
     private final MongoTemplate mongoTemplate;
-
-    public CrackTaskStatusTrackerService(CrackTasksRepository repository, MongoTemplate mongoTemplate) {
-        this.repository = repository;
-        this.mongoTemplate = mongoTemplate;
-    }
 
     @PostConstruct
     private void init() {
@@ -48,11 +50,14 @@ public class CrackTaskStatusTrackerService {
     private int workerCount;
 
     public String createTask() {
-        return repository.save(new CrackTaskDocument(
-                IN_PROGRESS,
-                workerCount,
-                Instant.now(),
-                new ArrayList<>())).getId();
+        return cracksRepository.save(
+                new CracksDocument(
+                        IN_PROGRESS,
+                        workerCount,
+                        Instant.now(),
+                        new ArrayList<>()
+                )
+        ).getId();
     }
 
     public void onWorkerResponse(String taskId, List<String> matches) {
@@ -64,30 +69,32 @@ public class CrackTaskStatusTrackerService {
                 .inc("pendingWorkers", -1)
                 .addToSet("matches").each(matches);
 
-        CrackTaskDocument updated = mongoTemplate.findAndModify(
+        CracksDocument updated = mongoTemplate.findAndModify(
                 query,
                 update,
                 new FindAndModifyOptions().returnNew(true),
-                CrackTaskDocument.class);
+                CracksDocument.class
+        );
 
         if (updated != null && updated.getPendingWorkers() <= 0) {
             mongoTemplate.updateFirst(
                     Query.query(Criteria.where("_id").is(taskId)),
                     Update.update("status", READY),
-                    CrackTaskDocument.class);
+                    CracksDocument.class
+            );
             log.info("Change task {} status to \"READY\".", taskId);
         }
     }
 
     public CrackTaskStatusEnum getStatus(String guid) throws NoSuchElementException {
-        return repository.findById(guid)
-                .map(CrackTaskDocument::getStatus)
+        return cracksRepository.findById(guid)
+                .map(CracksDocument::getStatus)
                 .orElseThrow();
     }
 
     public List<String> getMatches(String guid) {
-        return repository.findById(guid)
-                .map(CrackTaskDocument::getMatches)
+        return cracksRepository.findById(guid)
+                .map(CracksDocument::getMatches)
                 .orElseThrow();
     }
 
@@ -100,7 +107,26 @@ public class CrackTaskStatusTrackerService {
                                 .and("createdAt")
                                 .lt(Instant.now().minus(timeoutInMinutes))),
                 Update.update("status", ERROR),
-                CrackTaskDocument.class);
+                CracksDocument.class);
     }
 
+    public void saveTask(String guid, String hash, int hashMaxLength, int partCount, int partNumber) {
+        tasksRepository.save(
+                new TasksDocument(
+                        guid,
+                        hash,
+                        hashMaxLength,
+                        partCount,
+                        partNumber
+                )
+        );
+    }
+
+    public void removeTask(String guid) {
+        tasksRepository.deleteById(guid);
+    }
+
+    public List<TasksDocument> getPendingTasks() {
+        return tasksRepository.findTop100();
+    }
 }

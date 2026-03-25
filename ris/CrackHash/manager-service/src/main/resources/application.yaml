@@ -19,8 +19,13 @@ task:
       minutes: "${TASK_TIMEOUT_DURATION_MINUTES}"
 
 mongodb:
-  collection:
-    name: "${MONGO_INITDB_DATABASE}"
+  tasks:
+    collection:
+      name: "${MONGO_INITDB_TASKS_COLLECTION}"
+  cracks:
+    collection:
+      name: "${MONGO_INITDB_CRACKS_COLLECTION}"
+  name: "${MONGO_INITDB_DATABASE}"
 
 app:
   rabbitmq:
