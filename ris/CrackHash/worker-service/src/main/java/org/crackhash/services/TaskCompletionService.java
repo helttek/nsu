@@ -29,61 +29,25 @@ public class TaskCompletionService {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private AppProperties appProperties;
-    private boolean status = false;
 
-    @RabbitListener(queues = "${app.rabbitmq.worker.queue}", ackMode = "MANUAL")
-    public void complete(CrackHashManagerRequest dto, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
-        try {
-            log.info("Worker processing task (extracted task from queue): {}", dto.getRequestId());
+    public List<String> complete(CrackHashManagerRequest dto) {
+        String hash = dto.getHash();
+        List<String> alphabet = dto.getAlphabet().getSymbols();
+        int maxLength = dto.getMaxLength();
 
-            String hash = dto.getHash();
-            List<String> alphabet = dto.getAlphabet().getSymbols();
-            int maxLength = dto.getMaxLength();
+        Range range = Range.calculate(dto.getPartNumber(), dto.getPartCount(), maxLength, alphabet.size());
 
-            Range range = Range.calculate(
-                    dto.getPartNumber(), dto.getPartCount(), maxLength, alphabet.size());
+        log.info("Starting to crack hash \"{}\"", hash);
+        List<String> matchingWords = findMatches(alphabet, hash, range);
+        log.info("Finished cracking hash.");
 
-            log.info("Starting to crack hash \"{}\"", hash);
-            List<String> matchingWords = findMatches(alphabet, hash, range);
-            log.info("Finished cracking hash.");
-
-            CrackHashWorkerResponse result = new CrackHashWorkerResponse();
-            var answ = new CrackHashWorkerResponse.Answers();
-            answ.getWords().addAll(matchingWords);
-            result.setAnswers(answ);
-            result.setPartNumber(dto.getPartNumber());
-            result.setRequestId(dto.getRequestId());
-
-            rabbitTemplate.convertAndSend(
-                    appProperties.getRabbitmq().getManager().getExchange(),
-                    appProperties.getRabbitmq().getManager().getRoutingKey(),
-                    result
-            );
-
-            status = true;
-        } catch (Exception e) {
-            log.info("Failed to process task. Caught amqp exception.");
-            log.info(e.getMessage());
-        }
-
-        try {
-            if (status) {
-                channel.basicAck(tag, false);
-                log.info("Task completed successfully, removing the task from the queue.");
-            } else {
-                channel.basicNack(tag, false, true);
-                log.info("Failed to complete task, keeping the task in the queue.");
-            }
-        } catch (IOException e) {
-            log.info(e.getMessage());
-        }
+        return matchingWords;
     }
 
     private List<String> findMatches(List<String> alphabet, String hash, Range range) {
         ArrayList<String> matchingWords = new ArrayList<>();
 
-        for (int length = range.getStartingCombinationLength(); length <= range
-                .getEndingCombinationLength(); length++) {
+        for (int length = range.getStartingCombinationLength(); length <= range.getEndingCombinationLength(); length++) {
 
             long iterStart, iterEnd;
             long totalAtLength = (long) Math.pow(alphabet.size(), length);

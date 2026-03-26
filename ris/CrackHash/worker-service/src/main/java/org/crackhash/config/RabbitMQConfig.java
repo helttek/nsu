@@ -29,7 +29,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding workerBinding(Queue workerQueue, DirectExchange workerExchange) {
-        return BindingBuilder.bind(workerQueue).to(workerExchange).with(appProperties.getRabbitmq().getWorker().getRoutingKey());
+        return BindingBuilder
+                .bind(workerQueue)
+                .to(workerExchange)
+                .with(appProperties.getRabbitmq().getWorker().getRoutingKey());
     }
 
     @Bean
@@ -44,7 +47,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding managerBinding(Queue managerQueue, DirectExchange managerExchange) {
-        return BindingBuilder.bind(managerQueue).to(managerExchange).with(appProperties.getRabbitmq().getManager().getRoutingKey());
+        return BindingBuilder
+                .bind(managerQueue)
+                .to(managerExchange)
+                .with(appProperties.getRabbitmq().getManager().getRoutingKey());
     }
 
     @Bean
@@ -62,7 +68,8 @@ public class RabbitMQConfig {
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
-            MessageConverter jsonMessageConverter) {
+            MessageConverter jsonMessageConverter
+    ) {
         SimpleRabbitListenerContainerFactory factory =
                 new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);

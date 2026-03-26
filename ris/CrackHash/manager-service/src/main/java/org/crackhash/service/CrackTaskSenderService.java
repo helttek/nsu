@@ -1,7 +1,5 @@
 package org.crackhash.service;
 
-import com.rabbitmq.client.ShutdownNotifier;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.crackhash.config.AppProperties;
 import org.crackhash.model.TasksDocument;
@@ -31,7 +29,7 @@ public class CrackTaskSenderService {
     public void send(String requestId, String hash, int hashMaxLength) {
         for (int i = 1; i <= appProperties.getWorker().getCount(); i++) {
             CrackHashManagerRequest request = createRequest(requestId, hash, hashMaxLength, i, appProperties.getWorker().getCount());
-            log.info("Sending task {} to queue", request.getRequestId());
+            log.info("Sending task {} to queue.", request.getRequestId());
             try {
                 rabbitTemplate.convertAndSend(
                         appProperties.getRabbitmq().getWorker().getExchange(),

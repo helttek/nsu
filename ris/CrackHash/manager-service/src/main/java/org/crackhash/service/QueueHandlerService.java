@@ -24,9 +24,10 @@ public class QueueHandlerService {
     public void receiveResult(
             CrackHashWorkerResponse result,
             Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
+            @Header(AmqpHeaders.DELIVERY_TAG) long tag
+    ) {
 
-        log.info("Received completed task: {}", result.getRequestId());
+        log.info("Received completed task: {}.", result.getRequestId());
 
         boolean success = false;
         try {
@@ -44,19 +45,17 @@ public class QueueHandlerService {
             success = true;
 
         } catch (Exception e) {
-            log.error("Failed to process task {}", result.getRequestId(), e);
+            log.error("Failed to process task {}.", result.getRequestId(), e);
         }
 
         try {
             if (success) {
                 channel.basicAck(tag, false);
             } else {
-                // decide if transient or permanent
-                // here we use false to prevent infinite redelivery
                 channel.basicNack(tag, false, true);
             }
         } catch (IOException e) {
-            log.error("Ack/Nack failed for task {}", result.getRequestId(), e);
+            log.error("Ack/Nack failed for task {}.", result.getRequestId(), e);
         }
     }
 }

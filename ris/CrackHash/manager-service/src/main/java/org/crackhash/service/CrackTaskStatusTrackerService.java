@@ -9,6 +9,7 @@ import org.crackhash.repository.CracksRepository;
 import org.crackhash.repository.TasksRepository;
 import org.crackhash.util.CrackTaskStatusEnum;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -41,27 +42,38 @@ public class CrackTaskStatusTrackerService {
 
     @PostConstruct
     private void init() {
-        this.timeoutInMinutes = Duration.ofMinutes(taskTimeoutDurationMinutes);
+        try {
+            this.timeoutInMinutes = Duration.ofMinutes(taskTimeoutDurationMinutes);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize " + CrackTaskStatusTrackerService.class + ": " + e.getMessage() + ".");
+        }
     }
 
     @Value("${app.worker.count}")
     private int workerCount;
 
-    public String createTask() {
-        return cracksRepository.save(
-                new CracksDocument(
-                        IN_PROGRESS,
-                        workerCount,
-                        Instant.now(),
-                        new ArrayList<>()
-                )
-        ).getId();
+    public String createTask() throws RuntimeException {
+        try {
+            return cracksRepository.save(
+                    new CracksDocument(
+                            IN_PROGRESS,
+                            workerCount,
+                            Instant.now(),
+                            new ArrayList<>()
+                    )
+            ).getId();
+        } catch (OptimisticLockingFailureException e) {
+            throw new RuntimeException("Failed to create task in the database: " + e.getMessage());
+        } catch (IllegalArgumentException ignored) {
+            throw new RuntimeException("Failed to create task: CracksDocument is somehow null.");
+        }
     }
 
     public void onWorkerResponse(String taskId, List<String> matches) {
         Query query = Query.query(
                 Criteria.where("_id").is(taskId)
-                        .and("status").is(IN_PROGRESS));
+                        .and("status").is(IN_PROGRESS)
+        );
 
         Update update = new Update()
                 .inc("pendingWorkers", -1)
@@ -84,13 +96,13 @@ public class CrackTaskStatusTrackerService {
         }
     }
 
-    public CrackTaskStatusEnum getStatus(String guid) throws NoSuchElementException {
+    public CrackTaskStatusEnum getStatus(String guid) throws NoSuchElementException, IllegalArgumentException {
         return cracksRepository.findById(guid)
                 .map(CracksDocument::getStatus)
                 .orElseThrow();
     }
 
-    public List<String> getMatches(String guid) {
+    public List<String> getMatches(String guid) throws NoSuchElementException, IllegalArgumentException {
         return cracksRepository.findById(guid)
                 .map(CracksDocument::getMatches)
                 .orElseThrow();
@@ -103,25 +115,39 @@ public class CrackTaskStatusTrackerService {
                 Query.query(
                         Criteria.where("status").is(IN_PROGRESS)
                                 .and("createdAt")
-                                .lt(Instant.now().minus(timeoutInMinutes))),
+                                .lt(Instant.now().minus(timeoutInMinutes))
+                ),
                 Update.update("status", ERROR),
-                CracksDocument.class);
-    }
-
-    public void saveTask(String guid, String hash, int hashMaxLength, int partCount, int partNumber) {
-        tasksRepository.save(
-                new TasksDocument(
-                        guid,
-                        hash,
-                        hashMaxLength,
-                        partCount,
-                        partNumber
-                )
+                CracksDocument.class
         );
     }
 
+    public void saveTask(String guid, String hash, int hashMaxLength, int partCount, int partNumber) {
+        try {
+            tasksRepository.save(
+                    new TasksDocument(
+                            guid,
+                            hash,
+                            hashMaxLength,
+                            partCount,
+                            partNumber
+                    )
+            );
+        } catch (OptimisticLockingFailureException e) {
+            log.info("Failed to save task in the database: {}", e.getMessage());
+        } catch (IllegalArgumentException ignored) {
+            log.info("Failed to save task: TasksDocument is somehow null.");
+        }
+    }
+
     public void removeTask(String guid) {
-        tasksRepository.deleteById(guid);
+        try {
+            tasksRepository.deleteById(guid);
+        } catch (OptimisticLockingFailureException e) {
+            log.info("Failed to remove task from the database: {}", e.getMessage());
+        } catch (IllegalArgumentException ignored) {
+            log.info("Failed to remove task from the database: id is somehow null.");
+        }
     }
 
     public List<TasksDocument> getPendingTasks() {

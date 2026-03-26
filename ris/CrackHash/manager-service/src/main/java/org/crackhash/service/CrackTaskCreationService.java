@@ -6,8 +6,6 @@ import org.crackhash.dto.request.CrackTaskCreationRequest;
 import org.crackhash.dto.response.CrackTaskCreationResponse;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @AllArgsConstructor
 @Slf4j
