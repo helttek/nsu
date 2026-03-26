@@ -1,6 +1,5 @@
 package org.crackhash.service;
 
-import com.sun.source.doctree.SeeTree;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
 import static org.crackhash.util.CrackTaskStatusEnum.*;
 
@@ -127,6 +125,6 @@ public class CrackTaskStatusTrackerService {
     }
 
     public List<TasksDocument> getPendingTasks() {
-        return tasksRepository.findTop100();
+        return tasksRepository.findTop100By();
     }
 }

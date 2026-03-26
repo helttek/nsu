@@ -16,6 +16,7 @@ app:
       queue: "${RABBITMQ_WORKER_QUEUE}"
       exchange: "${RABBITMQ_WORKER_EXCHANGE}"
       routing-key: "${RABBITMQ_WORKER_ROUTING_KEY}"
+      concurrency: "${CONCURRENCY_PER_WORKER}"
     manager:
       queue: "${RABBITMQ_MANAGER_QUEUE}"
       exchange: "${RABBITMQ_MANAGER_EXCHANGE}"

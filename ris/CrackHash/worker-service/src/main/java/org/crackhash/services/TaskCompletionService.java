@@ -54,8 +54,6 @@ public class TaskCompletionService {
             result.setPartNumber(dto.getPartNumber());
             result.setRequestId(dto.getRequestId());
 
-
-//        taskResponseSenderService.send(matchingWords, dto.getRequestId(), dto.getPartNumber());
             rabbitTemplate.convertAndSend(
                     appProperties.getRabbitmq().getManager().getExchange(),
                     appProperties.getRabbitmq().getManager().getRoutingKey(),
@@ -63,7 +61,6 @@ public class TaskCompletionService {
             );
 
             status = true;
-//        log.info("Sent hash crack results to manager.");
         } catch (Exception e) {
             log.info("Failed to process task. Caught amqp exception.");
             log.info(e.getMessage());

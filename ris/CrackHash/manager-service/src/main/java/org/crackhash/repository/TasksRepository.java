@@ -11,5 +11,5 @@ public interface TasksRepository extends MongoRepository<TasksDocument, String> 
     @Query("{}")
     Stream<TasksDocument> streamPendingTasks();
 
-    List<TasksDocument> findTop100();
+    List<TasksDocument> findTop100By();
 }
