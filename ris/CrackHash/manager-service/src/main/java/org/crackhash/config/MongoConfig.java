@@ -33,7 +33,7 @@ public class MongoConfig {
                 .applyConnectionString(connStr)
                 .writeConcern(WriteConcern.MAJORITY.withWTimeout(2000, TimeUnit.MILLISECONDS))
                 .applyToClusterSettings(builder ->
-                        builder.serverSelectionTimeout(5000, TimeUnit.MILLISECONDS))
+                        builder.serverSelectionTimeout(2500, TimeUnit.MILLISECONDS))
                 .build();
         return MongoClients.create(settings);
     }
