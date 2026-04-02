@@ -1,1 +1,1 @@
-# Contains source materials for subject "Computational mathematics"
+# Вычислительная математика
