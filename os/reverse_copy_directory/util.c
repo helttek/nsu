@@ -141,7 +141,6 @@ int CopyFile(const char *srcDirPath, const char *destDirName, char *srcFileName,
     if (srcFile == NULL)
     {
         fprintf(stderr, "Couldn't open file %s.\n", srcFileName);
-        fclose(srcFile);
         return 0;
     }
     struct stat fileStat;
